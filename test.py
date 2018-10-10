@@ -9,6 +9,7 @@ import numpy as np
 from f_function import FFunction
 from u_tilde_function import UTildeFunction
 from p1_reference_element import P1ReferenceElement
+from affine_transformation import AffineTransformation
 
 class TestCode(unittest.TestCase):
     """
@@ -106,6 +107,24 @@ class TestCode(unittest.TestCase):
         x = (0.3,0.5)
         v = p1_reference_element.value(x)
         self.assertEqual(np.sum(v), 1)
+
+    def test_affine_transformation(self):
+        """
+        Tests the affine transformation
+        :return:
+        """
+
+        affine_trafo = AffineTransformation()
+
+        #Reference
+        x0 = (0,0)
+        x1 = (1,0)
+        x2 = (0,1)
+        self.assertEqual(affine_trafo.get_determinant(x0,x1,x2) , 1)
+
+        #Invalid simplex
+        x1=x0
+        self.assertEqual(affine_trafo.get_determinant(x0, x1, x2), 0)
 
 
 if __name__ == '__main__':
