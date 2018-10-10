@@ -24,3 +24,13 @@ class P1ReferenceElement:
         p_2 = x[1]
 
         return np.array([p_0,p_1,p_2])
+
+    def gradients(self,x):
+        """
+        Calculates the gradient of the reference element
+        :param x: The position at which the gradient should be calculated
+        :return: Matrix 2x3 containing the gradients
+        """
+        grad  = np.matrix('-1 -1 0; -1 0 -1')
+
+        return grad
