@@ -8,7 +8,7 @@ import numpy as np
 
 from f_function import FFunction
 from u_tilde_function import UTildeFunction
-
+from p1_reference_element import P1ReferenceElement
 
 class TestCode(unittest.TestCase):
     """
@@ -75,9 +75,37 @@ class TestCode(unittest.TestCase):
         n = np.array([[1,0]]).T
         self.assertAlmostEqual(np.asscalar(u_tilde_test_instance.gradient(x).T.dot(n)), 0)
 
+    def test_p1_reference_element(self):
+        """
+        Tests the implemented P1 reference element
+        :return:
+        """
+        p1_reference_element = P1ReferenceElement()
 
 
+        #Check nodal basis
+        x = (0,0)
+        v = p1_reference_element.value(x)
+        self.assertEqual(v[0], 1)
+        self.assertEqual(v[1], 0)
+        self.assertEqual(v[2], 0)
 
+        x = (1,0)
+        v = p1_reference_element.value(x)
+        self.assertEqual(v[0], 0)
+        self.assertEqual(v[1], 1)
+        self.assertEqual(v[2], 0)
+
+        x = (0,1)
+        v = p1_reference_element.value(x)
+        self.assertEqual(v[0], 0)
+        self.assertEqual(v[1], 0)
+        self.assertEqual(v[2], 1)
+
+        #Check sum properties
+        x = (0.3,0.5)
+        v = p1_reference_element.value(x)
+        self.assertEqual(np.sum(v), 1)
 
 
 if __name__ == '__main__':

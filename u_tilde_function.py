@@ -26,7 +26,7 @@ class UTildeFunction:
         :return: Gradient at x represented as collumn vector
         """
 
-        return np.array([[-np.pi*np.sin(np.pi*x[1])*np.sin(np.pi*x[0]), np.pi*np.cos(np.pi*x[0])*np.cos(np.pi*x[1])]]).T
+        return np.array([-np.pi*np.sin(np.pi*x[1])*np.sin(np.pi*x[0]), np.pi*np.cos(np.pi*x[0])*np.cos(np.pi*x[1])]).T
 
     def laplacian(self,x):
         """
