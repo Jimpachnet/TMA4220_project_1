@@ -130,7 +130,7 @@ class TestCode(unittest.TestCase):
         x0 = (1,0)
         x1 = (3,1)
         x2 = (3,2)
-        self.assertGreater(affine_trafo.get_determinant(x0, x1, x2), 1)
+        self.assertGreater(affine_trafo.get_determinant(x0, x1, x2), 0)
 
 
 if __name__ == '__main__':
