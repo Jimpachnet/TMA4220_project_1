@@ -104,8 +104,9 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
 
-    with writer.saving(fig, "writer_test.mp4",dpi=300 ):
+    with writer.saving(fig, "heat_hom.mp4",dpi=300 ):
         for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
             ni = 0
             for i in x:
                 nj = 0
@@ -185,3 +186,11 @@ def plot_error(trials,errors):
     plt.grid()
     plt.show()
 
+def show_matrix(matrix):
+    """
+    Visualizes a matrix
+    :param matrix: The matrix to visualize
+    """
+    plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.ocean)
+    plt.colorbar()
+    plt.show()

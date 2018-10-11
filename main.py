@@ -9,12 +9,14 @@ import numpy as np
 
 from u_tilde_function import UTildeFunction
 from u_function_tilde_dynamic import UTildeFunctionDynamic
-from visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function
+from visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix
 from mesh import Mesh
 from f_function import FFunction
 from solver import solve
 from u_function import UFunction
 from error_analysis import calc_l2_error
+from dynamic_solver import solve_dynamic
+from u_function_dynamic import UFunctionDynamic
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,6 +24,7 @@ def main():
     parser.add_argument('-vd', "--visualizedynamic", help="Plot the initial visualization", action='store_true')
     parser.add_argument('-m', "--mesh", help="Generate mesh", action='store_true')
     parser.add_argument('-s', "--solve", help="Starts the solver", action='store_true')
+    parser.add_argument('-sd', "--solvedynamic", help="Starts the dynamic solver", action='store_true')
     args = parser.parse_args()
 
     if args.visualize:
@@ -37,6 +40,13 @@ def main():
         f_function = FFunction()
         vertices, u = solve(mesh,f_function,accuracy=1.49e-1)
         plot_approx(vertices, u)
+    elif args.solvedynamic:
+        mesh = Mesh(5, 5)
+        u_ref = UTildeFunctionDynamic()
+        time, vertices,u = solve_dynamic(mesh,u_ref,3,t_0=0,timestep=0.001)
+        u_cont = UFunctionDynamic(time,vertices,u)
+        show_matrix(u)
+        plot_dynamic_2d_function(u_cont,3, t0 = 0,timestep = 0.01,supports = 100)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:
