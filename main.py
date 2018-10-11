@@ -25,32 +25,32 @@ def main():
     if args.visualize:
         visualize_u_tilde()
 
-    if args.mesh:
+    elif args.mesh:
         mesh = Mesh()
         mesh.generate_mesh(5,5)
         mesh.draw()
 
-    if args.solve:
-        mesh = Mesh(5,5)
+    elif args.solve:
+        mesh = Mesh(15,15)
         f_function = FFunction()
         vertices, u = solve(mesh,f_function,accuracy=1.49e-1)
         plot_approx(vertices, u)
-
-    h_tests = np.array([4,8,16])
-    errors = np.zeros_like(h_tests,dtype=float)
-    i = 0
-    for d in np.nditer(h_tests):
-        print("[Info] M="+str(d))
-        mesh = Mesh(d, d)
-        f_function = FFunction()
-        vertices, u = solve(mesh, f_function, accuracy=1.49e1)
-        u_func = UFunction(u, vertices)
-        u_tilde_func = UTildeFunction()
-        e = calc_l2_error(u_func,u_tilde_func)
-        errors[i] = e
-        print("[Info] L2 error for M="+str(d)+": "+str(errors[i]))
-        i+=1
-    plot_error(h_tests,errors)
+    else:
+        h_tests = np.array([4,8,16])
+        errors = np.zeros_like(h_tests,dtype=float)
+        i = 0
+        for d in np.nditer(h_tests):
+            print("[Info] M="+str(d))
+            mesh = Mesh(d, d)
+            f_function = FFunction()
+            vertices, u = solve(mesh, f_function, accuracy=1.49e1)
+            u_func = UFunction(u, vertices)
+            u_tilde_func = UTildeFunction()
+            e = calc_l2_error(u_func,u_tilde_func)
+            errors[i] = e
+            print("[Info] L2 error for M="+str(d)+": "+str(errors[i]))
+            i+=1
+        plot_error(h_tests,errors)
 
 def visualize_u_tilde():
     """

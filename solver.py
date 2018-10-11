@@ -12,13 +12,16 @@ from f_function import FFunction
 from p1_reference_element import P1ReferenceElement
 from affine_transformation import AffineTransformation
 from visual_tools import plot_approx
+from integration import gauss_legendre_reference
 
 
-def solve(mesh,f_function,accuracy = 1.49e-05):
+def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
     """
     Solves the Helmholtz problem under fixed BC.
     :param mesh: The mesh to operate on
     :param f_function: The inhomogenous right hand side
+    :param quadpack: Should the Fortran quadpack package be used to integrate numerically
+    :param accuracy: The accuracy for quadpack
     :return:
     """
 
@@ -40,7 +43,10 @@ def solve(mesh,f_function,accuracy = 1.49e-05):
         atraf.set_target_cell(v0_coord,v1_coord,v2_coord)
         for i in range(3):
             for j in range(3):
-                ans, err = integrate.dblquad(mass_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j))
+                if quadpack:
+                    ans, err = integrate.dblquad(mass_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j))
+                else:
+                    ans, err = gauss_legendre_reference(mass_matrix_integrant, args=(p1_ref, i, j))
                 M[tr_current.v[i],tr_current.v[j]] += atraf.get_determinant()*ans
 
     #Stiffness Matrix
@@ -58,9 +64,11 @@ def solve(mesh,f_function,accuracy = 1.49e-05):
                 #In order to make calculation feasible
                 co = (0.1, 0.1)
                 result = jinvt.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.dot(p1_ref.gradients(co)[:, j]))
-
-                ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt,result))
-                #ans2, err2 = integrate.dblquad(stiffness_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt))
+                if quadpack:
+                    ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt,result))
+                    #ans2, err2 = integrate.dblquad(stiffness_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt))
+                else:
+                    ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast, args=(p1_ref, i, j,jinvt,result))
                 K[tr_current.v[i],tr_current.v[j]] += atraf.get_determinant()*ans
 
     #b
