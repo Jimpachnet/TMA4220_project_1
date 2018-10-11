@@ -90,10 +90,11 @@ def solve(mesh,f_function,accuracy = 1.49e-05):
         if vertices[1,i] == 0 or vertices[1,i] == 1:
             A[i,:] = np.zeros((1,nr))
             A[i,i] = 1
+            b[i] = 0
 
     #Solve system
     u = np.linalg.inv(A).dot(b)
-    plot_approx(vertices,u)
+    return vertices,u
 
 
 

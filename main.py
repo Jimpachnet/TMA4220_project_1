@@ -7,7 +7,7 @@ Main file of the project
 import argparse
 
 from u_tilde_function import UTildeFunction
-from visual_tools import plot_2d_function
+from visual_tools import plot_2d_function,plot_approx
 from mesh import Mesh
 from f_function import FFunction
 from solver import solve
@@ -28,10 +28,10 @@ def main():
         mesh.draw()
 
     if args.solve:
-        mesh = Mesh(15,15)
+        mesh = Mesh(5,5)
         f_function = FFunction()
-        solve(mesh,f_function,accuracy=1.49e-1)
-        visualize_u_tilde()
+        vertices, u = solve(mesh,f_function,accuracy=1.49e-1)
+        plot_approx(vertices, u)
 
 def visualize_u_tilde():
     """
