@@ -88,6 +88,6 @@ def plot_approx(vertices,u):
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(r'$u(x)$')
-    ax.view_init(90, -160)
+    ax.view_init(90,0)
     plt.show()
 

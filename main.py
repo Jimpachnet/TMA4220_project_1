@@ -24,11 +24,11 @@ def main():
 
     if args.mesh:
         mesh = Mesh()
-        mesh.generate_mesh(3,3)
+        mesh.generate_mesh(5,5)
         mesh.draw()
 
     if args.solve:
-        mesh = Mesh(4,4)
+        mesh = Mesh(10,10)
         f_function = FFunction()
         solve(mesh,f_function,accuracy=1.49e-03)
 
