@@ -78,6 +78,11 @@ class AffineTransformation:
         :param v2: If coordinate of vertex is given, these will be used instead of previously set
         :return: The determinant
         """
+        if v0 == None:
+            #Grab vertices from storage
+            v0 = self.v0
+            v1 = self.v1
+            v2 = self.v2
 
         J = np.array([[v1[0] - v0[0], v2[0] - v0[0]], [v1[1] - v0[1], v2[1] - v0[1]]])
 

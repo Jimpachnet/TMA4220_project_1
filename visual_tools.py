@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from u_function import UFunction
 
 def plot_2d_function(function_object,supports=100):
     """
@@ -49,20 +50,73 @@ def plot_2d_function(function_object,supports=100):
     # Plot the surface
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    surf = ax.plot_surface(X, Y, Z, cmap=cm.plasma,
+    surf = ax.plot_surface(Y, X, Z, cmap=cm.plasma,
                            linewidth=0, antialiased=True)
+    #Todo X and Y axis seem to be turned
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.title(r'$\widetilde{u}(x)$')
-    ax.view_init(30, -160)
+    plt.title(r'$u(x)$')
+    ax.view_init(30, -70)
     plt.show()
 
-    cs = plt.contourf(X, Y, Z, cmap=cm.plasma)
+    cs = plt.contourf(Y, X, Z, cmap=cm.plasma)
     cbar = plt.colorbar(cs)
     plt.xlabel("x")
     plt.ylabel("y")
-    plt.title(r'$\widetilde{u}(x)$')
-    ax.view_init(30, -160)
+    plt.title(r'$u(x)$')
+    plt.show()
+
+def plot_approx(vertices,u):
+    """
+    Plots an approximate solution
+    :param vertices: The vertices array
+    :param u: The solution
+    :return:
+    """
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
+    ax.view_init(30, -70)
+    plt.show()
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
+    ax.view_init(0, -90)
+    plt.show()
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
+    ax.view_init(90,0)
+    plt.show()
+
+    calu = UFunction(u,vertices)
+
+    plot_2d_function(calu,1000)
+
+
+def plot_error(trials,errors):
+    """
+    Plot error over different mesh sizes
+    :param trials: Used mesh sizes
+    :param errors: calculated error
+    """
+
+    plt.plot(trials,errors)
+    plt.xlabel("M")
+    plt.ylabel("L2 error")
+    plt.grid()
     plt.show()
 
