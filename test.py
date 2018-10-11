@@ -126,6 +126,12 @@ class TestCode(unittest.TestCase):
         x1=x0
         self.assertEqual(affine_trafo.get_determinant(x0, x1, x2), 0)
 
+        #Test case from assignment
+        x0 = (1,0)
+        x1 = (3,1)
+        x2 = (3,2)
+        self.assertGreater(affine_trafo.get_determinant(x0, x1, x2), 1)
+
 
 if __name__ == '__main__':
     print("Starting unittest...")
