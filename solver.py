@@ -79,7 +79,7 @@ def solve(mesh,f_function,accuracy = 1.49e-05):
         y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
         jinvt = atraf.get_inverse_jacobian().T
         for i in range(3):
-            ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy/10, epsrel=accuracy/10, args=(p1_ref, i,f_function,jinvt,v0_coord))
+            ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
             b[tr_current.v[i]] += ans
 
     #Solve system

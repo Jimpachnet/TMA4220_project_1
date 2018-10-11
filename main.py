@@ -28,9 +28,10 @@ def main():
         mesh.draw()
 
     if args.solve:
-        mesh = Mesh(10,10)
+        mesh = Mesh(15,15)
         f_function = FFunction()
-        solve(mesh,f_function,accuracy=1.49e-03)
+        solve(mesh,f_function,accuracy=1.49e-1)
+        visualize_u_tilde()
 
 def visualize_u_tilde():
     """
