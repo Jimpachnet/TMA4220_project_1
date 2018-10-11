@@ -82,10 +82,21 @@ def solve(mesh,f_function,accuracy = 1.49e-05):
             ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
             b[tr_current.v[i]] += ans
 
+    A = K + M
+
+    #BC Dirichlet
+    nr = np.shape(vertices)[1]
+    for i in range(nr):
+        if vertices[1,i] == 0 or vertices[1,i] == 1:
+            A[i,:] = np.zeros((1,nr))
+            A[i,i] = 1
+
     #Solve system
-    A = K+M
     u = np.linalg.inv(A).dot(b)
     plot_approx(vertices,u)
+
+
+
 
 
 def mass_matrix_integrant(y,x,p1_ref,i,j):
