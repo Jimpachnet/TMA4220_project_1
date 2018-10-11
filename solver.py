@@ -86,8 +86,14 @@ def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
         y_min = np.min([v0_coord[1], v1_coord[1], v2_coord[1]])
         y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
         jinvt = atraf.get_inverse_jacobian().T
+        j = atraf.get_jacobian()
+        det = atraf.get_determinant()
         for i in range(3):
-            ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
+            if quadpack:
+                print("shitlife")
+                ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
+            else:
+                ans, err = gauss_legendre_reference(b_integrant_reference, args=(p1_ref, i,f_function,j,v0_coord,det))
             b[tr_current.v[i]] += ans
 
     A = K + M
@@ -128,4 +134,11 @@ def b_integrant(y,x,p1_ref,i,f_function,jinvt,v0_coord):
     x_tr = (jinvt.dot(xp)[0],jinvt.dot(xp)[1])
     val = p1_ref.value(x_tr)[i]
     return val*f_function.value(co)
+
+def b_integrant_reference(y,x,p1_ref,i,f_function,j,v0_coord,det):
+    co = (x,y)
+    xc = np.array([[x],[y]])
+    x0 = np.array([[v0_coord[0]],[v0_coord[1]]])
+    x_new = j.dot(xc)+x0
+    return np.asscalar(p1_ref.value(co)[i] * f_function.value((x_new[0],x_new[1])))*det
 

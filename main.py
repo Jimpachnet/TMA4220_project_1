@@ -31,7 +31,7 @@ def main():
         mesh.draw()
 
     elif args.solve:
-        mesh = Mesh(15,15)
+        mesh = Mesh(25,25)
         f_function = FFunction()
         vertices, u = solve(mesh,f_function,accuracy=1.49e-1)
         plot_approx(vertices, u)
@@ -43,7 +43,7 @@ def main():
             print("[Info] M="+str(d))
             mesh = Mesh(d, d)
             f_function = FFunction()
-            vertices, u = solve(mesh, f_function, accuracy=1.49e1)
+            vertices, u = solve(mesh, f_function, accuracy=1.49e-1)
             u_func = UFunction(u, vertices)
             u_tilde_func = UTildeFunction()
             e = calc_l2_error(u_func,u_tilde_func)
