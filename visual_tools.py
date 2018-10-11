@@ -107,5 +107,16 @@ def plot_approx(vertices,u):
     plot_2d_function(calu,1000)
 
 
+def plot_error(trials,errors):
+    """
+    Plot error over different mesh sizes
+    :param trials: Used mesh sizes
+    :param errors: calculated error
+    """
 
+    plt.plot(trials,errors)
+    plt.xlabel("M")
+    plt.ylabel("L2 error")
+    plt.grid()
+    plt.show()
 
