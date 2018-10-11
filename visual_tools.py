@@ -63,6 +63,31 @@ def plot_2d_function(function_object,supports=100):
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(r'$\widetilde{u}(x)$')
+    plt.show()
+
+def plot_approx(vertices,u):
+    """
+    Plots an approximate solution
+    :param vertices: The vertices array
+    :param u: The solution
+    :return:
+    """
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
     ax.view_init(30, -160)
+    plt.show()
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
+    ax.view_init(90, -160)
     plt.show()
 

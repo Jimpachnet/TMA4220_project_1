@@ -24,3 +24,8 @@ class Triangle:
         self.v1 = v1
         self.v2 = v2
         self.id = id
+
+        self.v = np.zeros(3,dtype=int)
+        self.v[0] = v0
+        self.v[1] = v1
+        self.v[2] = v2

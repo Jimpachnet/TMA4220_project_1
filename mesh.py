@@ -19,6 +19,16 @@ class Mesh:
     Represents a mesh
     """
 
+    def __init__(self,sx,sy,h=1,w=1):
+        """
+        Initialize the mesh
+        :param sx: Number of support points in x
+        :param sy: Number of support points in y
+        :param h: Height of the rectangle
+        :param w: Width of the rectangle
+        """
+        self.generate_mesh(sx,sy,h,w)
+
     def generate_mesh(self,supportsx,supportsy,height=1,width=1):
         """
         Generates a simplex mesh in 2D on a rectangle
@@ -55,6 +65,8 @@ class Mesh:
 
         self.triangles = trianglelist
         self.vertices = vertices
+        self.supportsx = supportsx
+        self.supportsy = supportsy
 
 
     def draw(self):
