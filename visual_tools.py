@@ -5,6 +5,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as manimation
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
@@ -67,6 +68,92 @@ def plot_2d_function(function_object,supports=100):
     plt.title(r'$u(x)$')
     plt.show()
 
+
+def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.01,supports = 100):
+    """
+    Plots a time dependant function
+    :param dynamic_function_object: Time dependant function
+    :param t_end: Time at which the simulation should end
+    :param t0: Start time
+    :param timestep: Time delta between evaluations
+    :param supports: nuber of supports
+    """
+    if type(supports) is int:
+        perside = int(np.sqrt(supports))
+        h = 1/(perside-1)
+        coordinate_list = []
+        for i in range(perside):
+            for j in range(perside):
+                coordinate_list.append((i*h,j*h))
+        #Makes problems because of how the plot function works
+
+        x = np.linspace(0, 1, num=perside)
+        y = np.linspace(0, 1, num=perside)
+
+    else:
+        raise NotImplementedError("To be implemented")
+
+    t_arr = np.arange(t0,t_end,timestep)
+
+    X, Y = np.meshgrid(x, y)
+    Z = np.zeros_like(X)
+
+    FFMpegWriter = manimation.writers['ffmpeg']
+    metadata = dict(title='u', artist='Test',
+                    comment='Works')
+    writer = FFMpegWriter(fps=15, metadata=metadata)
+    fig = plt.figure()
+
+    with writer.saving(fig, "heat_hom3d.mp4",dpi=300 ):
+        for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            ni = 0
+            for i in x:
+                nj = 0
+                for j in y:
+                    prr = (i, j)
+                    Z[ni, nj] = dynamic_function_object.value(prr,t_arr[t])
+                    nj += 1
+                ni += 1
+
+            ax = fig.gca(projection='3d')
+            surf = ax.plot_surface(Y, X, Z, cmap=cm.plasma,
+                                   linewidth=0, antialiased=True)
+            # Todo X and Y axis seem to be turned
+            cbar = fig.colorbar(surf, shrink=0.5, aspect=5)
+            cbar.set_clim(0,1)
+            plt.xlabel("x")
+            plt.ylabel("y")
+
+            ax.set_zlim(0,1)
+            plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
+            ax.view_init(30, -70)
+
+
+            writer.grab_frame()
+            plt.gcf().clear()
+
+
+    with writer.saving(fig, "heat_hom.mp4",dpi=300 ):
+        for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            ni = 0
+            for i in x:
+                nj = 0
+                for j in y:
+                    prr = (i, j)
+                    Z[ni, nj] = dynamic_function_object.value(prr,t_arr[t])
+                    nj += 1
+                ni += 1
+
+            cs = plt.contourf(Y, X, Z, cmap=cm.plasma)
+            cbar = plt.colorbar(cs)
+            plt.xlabel("x")
+            plt.ylabel("y")
+            plt.title(r'$u(x)$')
+            writer.grab_frame()
+            plt.gcf().clear()
+
 def plot_approx(vertices,u):
     """
     Plots an approximate solution
@@ -120,3 +207,11 @@ def plot_error(trials,errors):
     plt.grid()
     plt.show()
 
+def show_matrix(matrix):
+    """
+    Visualizes a matrix
+    :param matrix: The matrix to visualize
+    """
+    plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.ocean)
+    plt.colorbar()
+    plt.show()
