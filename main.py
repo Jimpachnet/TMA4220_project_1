@@ -31,8 +31,7 @@ def main():
         visualize_u_tilde()
 
     elif args.mesh:
-        mesh = Mesh()
-        mesh.generate_mesh(5,5)
+        mesh = Mesh(5,5)
         mesh.draw()
 
     elif args.solve:
@@ -43,7 +42,7 @@ def main():
     elif args.solvedynamic:
         mesh = Mesh(5, 5)
         u_ref = UTildeFunctionDynamic()
-        time, vertices,u = solve_dynamic(mesh,u_ref,3,t_0=0,timestep=0.001)
+        time, vertices,u = solve_dynamic(mesh,u_ref,3,t_0=0,timestep=0.0001)
         u_cont = UFunctionDynamic(time,vertices,u)
         show_matrix(u)
         plot_dynamic_2d_function(u_cont,0.1, t0 = 0,timestep = 0.001,supports = 100)

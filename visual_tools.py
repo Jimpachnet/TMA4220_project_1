@@ -133,6 +133,27 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
             writer.grab_frame()
             plt.gcf().clear()
 
+
+    with writer.saving(fig, "heat_hom.mp4",dpi=300 ):
+        for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            ni = 0
+            for i in x:
+                nj = 0
+                for j in y:
+                    prr = (i, j)
+                    Z[ni, nj] = dynamic_function_object.value(prr,t_arr[t])
+                    nj += 1
+                ni += 1
+
+            cs = plt.contourf(Y, X, Z, cmap=cm.plasma)
+            cbar = plt.colorbar(cs)
+            plt.xlabel("x")
+            plt.ylabel("y")
+            plt.title(r'$u(x)$')
+            writer.grab_frame()
+            plt.gcf().clear()
+
 def plot_approx(vertices,u):
     """
     Plots an approximate solution
