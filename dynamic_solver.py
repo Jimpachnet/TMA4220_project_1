@@ -74,26 +74,52 @@ def solve_dynamic(mesh,reference_function,t_end,t_0 = 0,timestep = 0.01, quadpac
                 K[tr_current.v[i],tr_current.v[j]] += atraf.get_determinant()*ans
 
 
-    K[0,:] *=0
-    K[0,0] = 1
+    #Leakage at (0,0)
+    #K[0,:] *=0
+    #K[0,0] = 1
+
+    b = np.zeros((varnr,1))
+
+    #"Window" BC Dirichlet
+    nr = np.shape(vertices)[1]
+    for i in range(varnr):
+        if vertices[1,i] == 0:
+            K[i,:] = np.zeros((1,nr))
+            K[i,i] = 1
+            b[i] = 0
+
+
+    for i in range(varnr):
+        if vertices[1,i] == 1:
+            K[i,:] = np.zeros((1,nr))
+            K[i,i] = 1
+            b[i] = 1
+
+
+
     A = -np.linalg.inv(M).dot(K)
-
-
+    bm = np.linalg.inv(M).dot(b)
     t_arr = np.arange(t_0, t_end, timestep)
     nrtsteps = np.shape(t_arr)[0]
 
     u = np.zeros((varnr,nrtsteps))
 
-    u0 = u[:,0]
-    for i in range(varnr):
-        u0[i] = reference_function.value(vertices[:,i],0)
+
+
+
+
+    u0 = np.ones_like(u[:,0])*0.7
+
+    #Non homogenous initial condition
+    # u0 = u[:,0]
+    #for i in range(varnr):
+    #    u0[i] = reference_function.value(vertices[:,i],0)
 
     for i in range(nrtsteps):
         if i == 0:
             u[:, 0] = u0
         else:
-            u[:,i] = u[:,i-1]+timestep*A.dot(u[:,i-1])
-
+            u[:,i] = u[:,i-1]+timestep*(A.dot(u[:,i-1])+bm[:,0])
     return t_arr, vertices, u
 
 

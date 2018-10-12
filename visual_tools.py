@@ -104,7 +104,7 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
 
-    with writer.saving(fig, "heat_hom.mp4",dpi=300 ):
+    with writer.saving(fig, "heat_hom3d.mp4",dpi=300 ):
         for t in range(np.shape(t_arr)[0]):
             print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
             ni = 0

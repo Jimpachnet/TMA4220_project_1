@@ -46,7 +46,7 @@ def main():
         time, vertices,u = solve_dynamic(mesh,u_ref,3,t_0=0,timestep=0.001)
         u_cont = UFunctionDynamic(time,vertices,u)
         show_matrix(u)
-        plot_dynamic_2d_function(u_cont,3, t0 = 0,timestep = 0.01,supports = 100)
+        plot_dynamic_2d_function(u_cont,0.1, t0 = 0,timestep = 0.001,supports = 100)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:
