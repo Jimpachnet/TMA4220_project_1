@@ -12,14 +12,13 @@ from src.infrastructure.affine_transformation import AffineTransformation
 from src.utils.integration import gauss_legendre_reference
 
 
-def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
+def solve_helmholtz(mesh, f_function, quadpack = False, accuracy = 1.49e-05):
     """
     Solves the Helmholtz problem under fixed BC.
     :param mesh: The mesh to operate on
     :param f_function: The inhomogenous right hand side
     :param quadpack: Should the Fortran quadpack package be used to integrate numerically
     :param accuracy: The accuracy for quadpack
-    :return:
     """
 
     vertices = mesh.vertices
@@ -94,6 +93,9 @@ def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
             b[tr_current.v[i]] += ans
 
     A = K + M
+
+
+    #Todo:Check if BC are right
 
     #BC Dirichlet
     nr = np.shape(vertices)[1]

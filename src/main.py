@@ -12,7 +12,7 @@ from src.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from src.utils.visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix,plot_dynamic_2d_function_from_int
 from src.infrastructure.mesh import Mesh
 from src.functions.f_function import FFunction
-from src.solvers.solver import solve
+from src.solvers.solver_helmholtz import solve_helmholtz
 from src.functions.u_function import UFunction
 from src.utils.error_analysis import calc_l2_error
 from src.solvers.dynamic_solver import solve_dynamic
@@ -39,7 +39,7 @@ def main():
     elif args.solve:
         mesh = Mesh(25,25)
         f_function = FFunction()
-        vertices, u = solve(mesh,f_function,accuracy=1.49e-1)
+        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
         plot_approx(vertices, u)
     elif args.solvedynamic:
         mesh = Mesh(5, 5)
@@ -62,7 +62,7 @@ def main():
             print("[Info] M="+str(d))
             mesh = Mesh(d, d)
             f_function = FFunction()
-            vertices, u = solve(mesh, f_function, accuracy=1.49e-1)
+            vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
             u_func = UFunction(u, vertices)
             u_tilde_func = UTildeFunction()
             e = calc_l2_error(u_func,u_tilde_func)
