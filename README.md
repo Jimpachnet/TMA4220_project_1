@@ -12,4 +12,5 @@ Solution to project 1 in the course TMA4220 at NTNU Trondheim in autumn semester
 * Visualization of the 2D functions
 * Simple unit tests for the functions
 ### Todo
-* Pretty much everything
+* Find axis 3d inversion bub
+* Check if boundary conditions are implemented right
