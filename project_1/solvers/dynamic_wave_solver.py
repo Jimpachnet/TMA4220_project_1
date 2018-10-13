@@ -7,10 +7,10 @@ Implements solver for 2D wave problem
 import numpy as np
 import scipy.integrate as integrate
 
-from src.infrastructure.p1_reference_element import P1ReferenceElement
-from src.infrastructure.affine_transformation import AffineTransformation
-from src.utils.integration import gauss_legendre_reference
-from scipy.integrate import RK45
+from project_1.infrastructure.p1_reference_element import P1ReferenceElement
+from project_1.infrastructure.affine_transformation import AffineTransformation
+from project_1.utils.integration import gauss_legendre_reference
+from project_1.solvers.rk_45_fd_solver import solve_dynamic_system
 from scipy.interpolate import  LinearNDInterpolator
 
 
@@ -21,7 +21,7 @@ def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accu
     :param f_function: The inhomogenous right hand side
     :param quadpack: Should the Fortran quadpack package be used to integrate numerically
     :param accuracy: The accuracy for quadpack
-    :return:
+    :return: An ND interpolator
     """
 
     vertices = mesh.vertices
@@ -140,21 +140,10 @@ def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accu
     J[0:varnr,varnr:] = np.eye(varnr)
     J[varnr:,0:varnr] = A
 
-    t_arr = np.zeros((1,1))
-    x = x0
-    x = np.expand_dims(x,axis=1)
+
     def system(t,y,J):
         return y.dot(J)
-    ivp = RK45(fun=lambda t, y: system(t, y, J), t0=0, y0=x0, t_bound=t_end, max_step=timestep, rtol=0.001, atol=1e-06, vectorized=False)
-
-    while True:
-        if(ivp.t>=t_end):
-            break
-        ivp.step()
-        x = np.append(x,np.expand_dims(ivp.y,axis=1),axis=1)
-        t_arr = np.append(t_arr,np.ones((1,1))*ivp.t,axis=1)
-
-    print("[Info] Made "+str(t_arr.shape[1])+" timesetps")
+    x,t_arr = solve_dynamic_system(system,J,timestep,t_end,x0)
 
     #Todo: Beautify
     print("[Info] Generating interpolator")

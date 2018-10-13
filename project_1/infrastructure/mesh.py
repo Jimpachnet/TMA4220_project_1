@@ -7,7 +7,7 @@ Generates a simplex mesh based on the input
 
 import numpy as np
 
-from src.infrastructure.triangle import Triangle
+from project_1.infrastructure.triangle import Triangle
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 

@@ -6,10 +6,10 @@
 import unittest
 import numpy as np
 
-from src.functions.f_function import FFunction
-from src.functions.u_tilde_function import UTildeFunction
-from src.infrastructure.p1_reference_element import P1ReferenceElement
-from src.infrastructure.affine_transformation import AffineTransformation
+from project_1.functions.f_function import FFunction
+from project_1.functions.u_tilde_function import UTildeFunction
+from project_1.infrastructure.p1_reference_element import P1ReferenceElement
+from project_1.infrastructure.affine_transformation import AffineTransformation
 
 class TestCode(unittest.TestCase):
     """

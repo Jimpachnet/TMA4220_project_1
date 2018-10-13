@@ -7,17 +7,17 @@ Main file of the project.
 import argparse
 import numpy as np
 
-from src.functions.u_tilde_function import UTildeFunction
-from src.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
-from src.utils.visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix,plot_dynamic_2d_function_from_int
-from src.infrastructure.mesh import Mesh
-from src.functions.f_function import FFunction
-from src.solvers.solver_helmholtz import solve_helmholtz
-from src.functions.u_function import UFunction
-from src.utils.error_analysis import calc_l2_error
-from src.solvers.dynamic_solver import solve_dynamic
-from src.solvers.dynamic_wave_solver import solve_wave_dynamic
-from src.functions.u_function_dynamic import UFunctionDynamic
+from project_1.functions.u_tilde_function import UTildeFunction
+from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
+from project_1.utils.visual_tools import *
+from project_1.infrastructure.mesh import Mesh
+from project_1.functions.f_function import FFunction
+from project_1.solvers.solver_helmholtz import solve_helmholtz
+from project_1.functions.u_function import UFunction
+from project_1.utils.error_analysis import calc_l2_error
+from project_1.solvers.dynamic_solver import solve_dynamic
+from project_1.solvers.dynamic_wave_solver import solve_wave_dynamic
+from project_1.functions.u_function_dynamic import UFunctionDynamic
 
 def main():
     parser = argparse.ArgumentParser()
@@ -40,18 +40,16 @@ def main():
         mesh = Mesh(25,25)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-        plot_approx(vertices, u)
+        plot_triangulated_helmholtz(vertices,mesh, u)
     elif args.solvedynamic:
-        mesh = Mesh(5, 5)
+        mesh = Mesh(10, 10)
         u_ref = UTildeFunctionDynamic()
-        time, vertices,u = solve_dynamic(mesh,u_ref,3,t_0=0,timestep=0.0001)
-        u_cont = UFunctionDynamic(time,vertices,u)
-        show_matrix(u)
-        plot_dynamic_2d_function(u_cont,0.1, t0 = 0,timestep = 0.001,supports = 100)
+        lnd = solve_dynamic(mesh,u_ref,0.2,t_0=0,timestep=0.01)
+        plot_dynamic_2d_function_from_int(lnd,0.2, t0 = 0,timestep = 0.01,supports = 100)
     elif args.wave:
-        mesh = Mesh(25, 25)
-        lnd = solve_wave_dynamic(mesh, 1, t_0=0, timestep=0.01)
-        plot_dynamic_2d_function_from_int(lnd, 1, t0=0, timestep=0.01, supports=1000)
+        mesh = Mesh(5,5)
+        lnd = solve_wave_dynamic(mesh, 0.5, t_0=0, timestep=0.1)
+        plot_dynamic_2d_function_from_int(lnd, 0.5, t0=0, timestep=0.1,minv=-0.5,maxv=0.5 ,supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:
@@ -71,19 +69,6 @@ def main():
             i+=1
         plot_error(h_tests,errors)
 
-def visualize_u_tilde():
-    """
-    Visualize u_tilde
-    """
-    u = UTildeFunction()
-    plot_2d_function(u,100000)
-
-def visualize_u_tilde_dynamic():
-    """
-    Visualize u_tilde_dynamic
-    """
-    u = UTildeFunctionDynamic()
-    plot_dynamic_2d_function(u,t_end=5,t0=0,timestep=0.1,supports=1000)
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as manimation
 from matplotlib import cm
-from src.functions.u_function import UFunction
+from project_1.functions.u_function import UFunction
+from project_1.functions.u_tilde_function import UTildeFunction
+from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from mpl_toolkits.mplot3d import Axes3D
 
 
@@ -125,7 +127,7 @@ def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,su
 
 
 
-def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,supports = 100):
+def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0,maxv = 1,filename="pde",supports = 100):
     """
      Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
      to plot dynamic function
@@ -133,10 +135,13 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,supports
     :param t_end: Time at which the simulation should end
     :param t0: Start time
     :param timestep: Time delta between evaluations
+    :param minv: Minimal value of z axis
+    :param maxv: Maximal value of z axis
+    :param filename: Name of the generated video
     :param supports: Nuber of supports
     """
 
-    minmax = 1
+
     if type(supports) is int:
         perside = int(np.sqrt(supports))
         h = 1/(perside-1)
@@ -163,7 +168,7 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,supports
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
 
-    with writer.saving(fig, "wave.mp4",dpi=300 ):
+    with writer.saving(fig, filename+".mp4",dpi=300 ):
         for t in range(np.shape(t_arr)[0]):
             print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
             ni = 0
@@ -179,11 +184,11 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,supports
                                    linewidth=0, antialiased=True)
             # Todo X and Y axis seem to be turned
             cbar = fig.colorbar(surf, shrink=0.5, aspect=5)
-            cbar.set_clim(-minmax,minmax)
+            cbar.set_clim(minv,maxv)
             plt.xlabel("x")
             plt.ylabel("y")
 
-            ax.set_zlim(-minmax,minmax)
+            ax.set_zlim(minv,maxv)
             plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
             ax.view_init(30, -70)
 
@@ -315,6 +320,30 @@ def plot_approx(vertices,u):
 
     plot_2d_function(calu,1000)
 
+def plot_triangulated_helmholtz(vertices,mesh,u):
+    """
+    Plots the triangulated solution
+    :param vertices: The vertices array
+    :param mesh: The mesh
+    :param u: The solution
+    """
+
+    x = vertices[0,:]
+    y = vertices[1,:]
+
+    triangles = np.zeros((len(mesh.triangles),3))
+
+    i = 0
+    for triangle in mesh.triangles:
+        triangles[i,:] = triangle.v
+        i+=1
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    ax.plot_trisurf(x,y,np.squeeze(u))
+    plt.show()
+
+
 
 def plot_error(trials,errors):
     """
@@ -337,3 +366,17 @@ def show_matrix(matrix):
     plt.imshow(matrix, interpolation='nearest', cmap=plt.cm.ocean)
     plt.colorbar()
     plt.show()
+
+def visualize_u_tilde():
+    """
+    Visualize u_tilde
+    """
+    u = UTildeFunction()
+    plot_2d_function(u,100000)
+
+def visualize_u_tilde_dynamic():
+    """
+    Visualize u_tilde_dynamic
+    """
+    u = UTildeFunctionDynamic()
+    plot_dynamic_2d_function(u,t_end=5,t0=0,timestep=0.1,supports=1000)
