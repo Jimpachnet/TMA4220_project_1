@@ -2,23 +2,17 @@
 # -*- coding: utf-8 -*-
 
 """
-Implements solver for 2D wave problem
+Implements solver for 2D Helmholtz problem
 """
 import numpy as np
 import scipy.integrate as integrate
 
-from mesh import Mesh
-from f_function import FFunction
-from u_function_tilde_dynamic import UTildeFunctionDynamic
-from p1_reference_element import P1ReferenceElement
-from affine_transformation import AffineTransformation
-from visual_tools import plot_approx
-from integration import gauss_legendre_reference
-from scipy.integrate import RK45
-from scipy.interpolate import  LinearNDInterpolator
+from src.infrastructure.p1_reference_element import P1ReferenceElement
+from src.infrastructure.affine_transformation import AffineTransformation
+from src.utils.integration import gauss_legendre_reference
 
 
-def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accuracy = 1.49e-05):
+def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
     """
     Solves the Helmholtz problem under fixed BC.
     :param mesh: The mesh to operate on
@@ -74,113 +68,44 @@ def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accu
                     ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast, args=(p1_ref, i, j,jinvt,result))
                 K[tr_current.v[i],tr_current.v[j]] += atraf.get_determinant()*ans
 
-
-    #Leakage at (0,0)
-    #K[0,:] *=0
-    #K[0,0] = 1
-
+    #b
+    print("[Info] Calculating linear form")
     b = np.zeros((varnr,1))
+    for n in range(len(mesh.triangles)):
+        tr_current = mesh.triangles[n]
+        v0_coord = (vertices[0,triangles[n].v0],vertices[1,triangles[n].v0])
+        v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
+        v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
+        atraf.set_target_cell(v0_coord,v1_coord,v2_coord)
 
-    A = -np.linalg.inv(M).dot(K)
+        x_min = np.min([v0_coord[0],v1_coord[0],v2_coord[0]])
+        x_max = np.max([v0_coord[0], v1_coord[0], v2_coord[0]])
+        y_min = np.min([v0_coord[1], v1_coord[1], v2_coord[1]])
+        y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
+        jinvt = atraf.get_inverse_jacobian().T
+        j = atraf.get_jacobian()
+        det = atraf.get_determinant()
+        for i in range(3):
+            if quadpack:
+                print("shitlife")
+                ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
+            else:
+                ans, err = gauss_legendre_reference(b_integrant_reference, args=(p1_ref, i,f_function,j,v0_coord,det))
+            b[tr_current.v[i]] += ans
 
-    #"Window" BC Dirichlet
-    #nr = np.shape(vertices)[1]
-    #for i in range(varnr):
-     #   if vertices[1,i] == 0:
-     #       A[i,:] = np.zeros((1,nr))
-     #       A[i,i] = 1
+    A = K + M
 
+    #BC Dirichlet
+    nr = np.shape(vertices)[1]
+    for i in range(nr):
+        if vertices[1,i] == 0 or vertices[1,i] == 1:
+            A[i,:] = np.zeros((1,nr))
+            A[i,i] = 1
+            b[i] = 0
 
-    #for i in range(varnr):
-     #   if vertices[1,i] == 1:
-     #       A[i,:] = np.zeros((1,nr))
-     #       A[i,i] = 1
-
-
-    #nr = np.shape(vertices)[1]
-    #for i in range(varnr):
-    #    if vertices[0,i] == 0:
-    #        A[i,:] = np.zeros((1,nr))
-    #        A[i,i] = 1
-
-
-    #for i in range(varnr):
-    #    if vertices[0,i] == 1:
-    #        A[i,:] = np.zeros((1,nr))
-    #        A[i,i] = 1
-
-
-
-    bm = np.linalg.inv(M).dot(b)
-
-    u = np.zeros((varnr,1))
-
-
-    print("[Info] Solving system in time domain")
-
-    u0 = np.ones_like(u[:,0])*0
-    for i in range(varnr):
-        if vertices[0,i] == 1 or vertices[0,i] == 0 or vertices[1,i] == 1 or vertices[1,i] == 0:
-            u0[i] = 0
-        elif (vertices[0,i]-0.5)**2 <= 0.2**2 and (vertices[1,i]-0.5)**2 <= 0.2**2:
-            u0[i] = 0.5-((vertices[0,i]-0.5)**2+(vertices[1,i]-0.5)**2)**(0.5)
-
-
-
-
-    v0 = np.ones_like(u[:, 0])*0
-
-    #Non homogenous initial condition
-    # u0 = u[:,0]
-    #for i in range(varnr):
-    #    u0[i] = reference_function.value(vertices[:,i],0)
-
-    x0 = np.zeros((2*varnr))
-
-    x0[0:varnr] = u0
-    x0[varnr:] = v0
-
-    J = np.zeros((2*varnr,2*varnr))
-    J[0:varnr,varnr:] = np.eye(varnr)
-    J[varnr:,0:varnr] = A
-
-    t_arr = np.zeros((1,1))
-    x = x0
-    x = np.expand_dims(x,axis=1)
-    def system(t,y,J):
-        return y.dot(J)
-    ivp = RK45(fun=lambda t, y: system(t, y, J), t0=0, y0=x0, t_bound=t_end, max_step=timestep, rtol=0.001, atol=1e-06, vectorized=False)
-
-    while True:
-        if(ivp.t>=t_end):
-            break
-        ivp.step()
-        x = np.append(x,np.expand_dims(ivp.y,axis=1),axis=1)
-        t_arr = np.append(t_arr,np.ones((1,1))*ivp.t,axis=1)
-
-    print("[Info] Made "+str(t_arr.shape[1])+" timesetps")
-
-    #Todo: Beautify
-    print("[Info] Generating interpolator")
-    u = x[0:varnr]
-    data = np.zeros((3,t_arr.shape[1]*varnr))
-    value = np.zeros((1,t_arr.shape[1]*varnr))
-    value = np.squeeze(value)
-    i = 0
-    k = 0
-    t_arr = np.squeeze(t_arr)
-    for c in u.T:
-        for j in range(varnr):
-            data[0,i] = t_arr[k]
-            data[1:3,i] = mesh.vertices[:,j]
-            value[i] = c[j]
-            i+=1
-        k+=1
-
-    lnd = LinearNDInterpolator(data.T,value)
-
-    return lnd
-
+    #Solve system
+    u = np.linalg.inv(A).dot(b)
+    return vertices,u
 
 
 

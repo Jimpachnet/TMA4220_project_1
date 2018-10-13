@@ -6,8 +6,6 @@ Tools to analyze the error of the solution
 """
 
 import numpy as np
-from u_function import UFunction
-from u_tilde_function import  UTildeFunction
 import scipy.integrate as integrate
 
 def calc_l2_error(u_function,u_tilde_function):

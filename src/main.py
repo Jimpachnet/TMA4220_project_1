@@ -2,22 +2,22 @@
 # -*- coding: utf-8 -*-
 
 """
-Main file of the project
+Main file of the project.
 """
 import argparse
 import numpy as np
 
-from u_tilde_function import UTildeFunction
-from u_function_tilde_dynamic import UTildeFunctionDynamic
-from visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix,plot_dynamic_2d_function_from_int,plot_dynamic_2d_function_from_int_plain
-from mesh import Mesh
-from f_function import FFunction
-from solver import solve
-from u_function import UFunction
-from error_analysis import calc_l2_error
-from dynamic_solver import solve_dynamic
-from dynamic_wave_solver import solve_wave_dynamic
-from u_function_dynamic import UFunctionDynamic
+from src.functions.u_tilde_function import UTildeFunction
+from src.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
+from src.utils.visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix,plot_dynamic_2d_function_from_int
+from src.infrastructure.mesh import Mesh
+from src.functions.f_function import FFunction
+from src.solvers.solver import solve
+from src.functions.u_function import UFunction
+from src.utils.error_analysis import calc_l2_error
+from src.solvers.dynamic_solver import solve_dynamic
+from src.solvers.dynamic_wave_solver import solve_wave_dynamic
+from src.functions.u_function_dynamic import UFunctionDynamic
 
 def main():
     parser = argparse.ArgumentParser()
@@ -74,7 +74,6 @@ def main():
 def visualize_u_tilde():
     """
     Visualize u_tilde
-    :return:
     """
     u = UTildeFunction()
     plot_2d_function(u,100000)
@@ -82,7 +81,6 @@ def visualize_u_tilde():
 def visualize_u_tilde_dynamic():
     """
     Visualize u_tilde_dynamic
-    :return:
     """
     u = UTildeFunctionDynamic()
     plot_dynamic_2d_function(u,t_end=5,t0=0,timestep=0.1,supports=1000)

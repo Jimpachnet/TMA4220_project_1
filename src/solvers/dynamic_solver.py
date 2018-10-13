@@ -2,23 +2,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Implements solver for 2D Helmholtz problem
+Implements solver for dynamic 2D problem
 """
 import numpy as np
 import scipy.integrate as integrate
 
-from mesh import Mesh
-from f_function import FFunction
-from p1_reference_element import P1ReferenceElement
-from affine_transformation import AffineTransformation
-from visual_tools import plot_approx
-from integration import gauss_legendre_reference
+from src.infrastructure.p1_reference_element import P1ReferenceElement
+from src.infrastructure.affine_transformation import AffineTransformation
+from src.utils.integration import gauss_legendre_reference
 
 
-def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
+def solve_dynamic(mesh,reference_function,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accuracy = 1.49e-05):
     """
-    Solves the Helmholtz problem under fixed BC.
+    Solves the dynamic problem under fixed BC.
     :param mesh: The mesh to operate on
+    :param reference_function: The function for the initial condition
     :param f_function: The inhomogenous right hand side
     :param quadpack: Should the Fortran quadpack package be used to integrate numerically
     :param accuracy: The accuracy for quadpack
@@ -71,44 +69,55 @@ def solve(mesh,f_function,quadpack = False,accuracy = 1.49e-05):
                     ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast, args=(p1_ref, i, j,jinvt,result))
                 K[tr_current.v[i],tr_current.v[j]] += atraf.get_determinant()*ans
 
-    #b
-    print("[Info] Calculating linear form")
+
+    #Leakage at (0,0)
+    #K[0,:] *=0
+    #K[0,0] = 1
+
     b = np.zeros((varnr,1))
-    for n in range(len(mesh.triangles)):
-        tr_current = mesh.triangles[n]
-        v0_coord = (vertices[0,triangles[n].v0],vertices[1,triangles[n].v0])
-        v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
-        v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
-        atraf.set_target_cell(v0_coord,v1_coord,v2_coord)
 
-        x_min = np.min([v0_coord[0],v1_coord[0],v2_coord[0]])
-        x_max = np.max([v0_coord[0], v1_coord[0], v2_coord[0]])
-        y_min = np.min([v0_coord[1], v1_coord[1], v2_coord[1]])
-        y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
-        jinvt = atraf.get_inverse_jacobian().T
-        j = atraf.get_jacobian()
-        det = atraf.get_determinant()
-        for i in range(3):
-            if quadpack:
-                print("shitlife")
-                ans, err = integrate.dblquad(b_integrant, x_min, x_max, lambda x: y_min, lambda x: y_max, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i,f_function,jinvt,v0_coord))
-            else:
-                ans, err = gauss_legendre_reference(b_integrant_reference, args=(p1_ref, i,f_function,j,v0_coord,det))
-            b[tr_current.v[i]] += ans
-
-    A = K + M
-
-    #BC Dirichlet
+    #"Window" BC Dirichlet
     nr = np.shape(vertices)[1]
-    for i in range(nr):
-        if vertices[1,i] == 0 or vertices[1,i] == 1:
-            A[i,:] = np.zeros((1,nr))
-            A[i,i] = 1
+    for i in range(varnr):
+        if vertices[1,i] == 0:
+            K[i,:] = np.zeros((1,nr))
+            K[i,i] = 1
             b[i] = 0
 
-    #Solve system
-    u = np.linalg.inv(A).dot(b)
-    return vertices,u
+
+    for i in range(varnr):
+        if vertices[1,i] == 1:
+            K[i,:] = np.zeros((1,nr))
+            K[i,i] = 1
+            b[i] = 1
+
+
+
+    A = -np.linalg.inv(M).dot(K)
+    bm = np.linalg.inv(M).dot(b)
+    t_arr = np.arange(t_0, t_end, timestep)
+    nrtsteps = np.shape(t_arr)[0]
+
+    u = np.zeros((varnr,nrtsteps))
+
+
+
+
+
+    u0 = np.ones_like(u[:,0])*0.7
+
+    #Non homogenous initial condition
+    # u0 = u[:,0]
+    #for i in range(varnr):
+    #    u0[i] = reference_function.value(vertices[:,i],0)
+
+    for i in range(nrtsteps):
+        if i == 0:
+            u[:, 0] = u0
+        else:
+            u[:,i] = u[:,i-1]+timestep*(A.dot(u[:,i-1])+bm[:,0])
+    return t_arr, vertices, u
+
 
 
 

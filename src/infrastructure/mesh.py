@@ -7,10 +7,8 @@ Generates a simplex mesh based on the input
 
 import numpy as np
 
-from triangle import Triangle
-import matplotlib
-from matplotlib.patches import Circle, Wedge, Polygon
-from matplotlib.collections import PatchCollection
+from src.infrastructure.triangle import Triangle
+from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 
 

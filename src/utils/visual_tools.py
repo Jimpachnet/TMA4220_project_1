@@ -6,10 +6,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as manimation
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-from u_function import UFunction
+from src.functions.u_function import UFunction
+from mpl_toolkits.mplot3d import Axes3D
+
 
 def plot_2d_function(function_object,supports=100):
     """
@@ -17,7 +17,6 @@ def plot_2d_function(function_object,supports=100):
     :param function_object: The function to be plottet. has to provide a .value(x) function.
     :param supports: Discrete supports at which the function should be evaluated. If an integer is given, the function
     will generate an equidistant grid with the given number of supports. If a list or array of points is given, those will be used for evaluation.
-    :return:
     """
 
     if type(supports) is int:
