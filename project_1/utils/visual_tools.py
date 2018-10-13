@@ -167,7 +167,6 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0
                     comment='Works')
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
-
     with writer.saving(fig, filename+".mp4",dpi=300 ):
         for t in range(np.shape(t_arr)[0]):
             print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
@@ -340,7 +339,12 @@ def plot_triangulated_helmholtz(vertices,mesh,u):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    ax.plot_trisurf(x,y,np.squeeze(u))
+    cs = ax.plot_trisurf(x,y,np.squeeze(u), cmap=cm.plasma)
+    cbar = plt.colorbar(cs)
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    plt.title(r'$u(x)$')
     plt.show()
 
 
