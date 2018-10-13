@@ -69,6 +69,129 @@ def plot_2d_function(function_object,supports=100):
     plt.show()
 
 
+
+
+
+
+def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,supports = 100):
+    """
+     Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
+     to plot dynamic function
+    :param lnd: Linear ND interpolator
+    :param t_end: Time at which the simulation should end
+    :param t0: Start time
+    :param timestep: Time delta between evaluations
+    :param supports: Nuber of supports
+    """
+
+    if type(supports) is int:
+        perside = int(np.sqrt(supports))
+        h = 1/(perside-1)
+        coordinate_list = []
+        for i in range(perside):
+            for j in range(perside):
+                coordinate_list.append((i*h,j*h))
+        #Makes problems because of how the plot function works
+
+        x = np.linspace(0, 1, num=perside)
+        y = np.linspace(0, 1, num=perside)
+
+    else:
+        raise NotImplementedError("To be implemented")
+
+    t_arr = np.arange(t0,t_end,timestep)
+
+
+    FFMpegWriter = manimation.writers['ffmpeg']
+    metadata = dict(title='u', artist='Test',
+                    comment='Works')
+    writer = FFMpegWriter(fps=15, metadata=metadata)
+    fig = plt.figure()
+
+    with writer.saving(fig, "wave_plain.mp4",dpi=300 ):
+        for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+
+            vals = np.zeros((perside,perside))
+            for i in range(perside):
+                for j in range(perside):
+                    vals[i,j] = lnd((t_arr[t],i,j))
+
+            plt.imshow(vals)
+
+
+            writer.grab_frame()
+            plt.gcf().clear()
+
+
+
+
+def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,supports = 100):
+    """
+     Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
+     to plot dynamic function
+    :param lnd: Linear ND interpolator
+    :param t_end: Time at which the simulation should end
+    :param t0: Start time
+    :param timestep: Time delta between evaluations
+    :param supports: Nuber of supports
+    """
+
+    minmax = 1
+    if type(supports) is int:
+        perside = int(np.sqrt(supports))
+        h = 1/(perside-1)
+        coordinate_list = []
+        for i in range(perside):
+            for j in range(perside):
+                coordinate_list.append((i*h,j*h))
+        #Makes problems because of how the plot function works
+
+        x = np.linspace(0, 1, num=perside)
+        y = np.linspace(0, 1, num=perside)
+
+    else:
+        raise NotImplementedError("To be implemented")
+
+    t_arr = np.arange(t0,t_end,timestep)
+
+    X, Y = np.meshgrid(x, y)
+    Z = np.zeros_like(X)
+
+    FFMpegWriter = manimation.writers['ffmpeg']
+    metadata = dict(title='u', artist='Test',
+                    comment='Works')
+    writer = FFMpegWriter(fps=15, metadata=metadata)
+    fig = plt.figure()
+
+    with writer.saving(fig, "wave.mp4",dpi=300 ):
+        for t in range(np.shape(t_arr)[0]):
+            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            ni = 0
+            for i in x:
+                nj = 0
+                for j in y:
+                    Z[ni, nj] = lnd((t_arr[t],i,j))
+                    nj += 1
+                ni += 1
+
+            ax = fig.gca(projection='3d')
+            surf = ax.plot_surface(Y, X, Z, cmap=cm.plasma,
+                                   linewidth=0, antialiased=True)
+            # Todo X and Y axis seem to be turned
+            cbar = fig.colorbar(surf, shrink=0.5, aspect=5)
+            cbar.set_clim(-minmax,minmax)
+            plt.xlabel("x")
+            plt.ylabel("y")
+
+            ax.set_zlim(-minmax,minmax)
+            plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
+            ax.view_init(30, -70)
+
+
+            writer.grab_frame()
+            plt.gcf().clear()
+
 def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.01,supports = 100):
     """
     Plots a time dependant function

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Implements solver for dynamic 2D problem
+Implements solver for 2D wave problem
 """
 import numpy as np
 import scipy.integrate as integrate
@@ -14,14 +14,14 @@ from p1_reference_element import P1ReferenceElement
 from affine_transformation import AffineTransformation
 from visual_tools import plot_approx
 from integration import gauss_legendre_reference
-from scipy.integrate import ode
+from scipy.integrate import RK45
+from scipy.interpolate import  LinearNDInterpolator
 
 
-def solve_dynamic(mesh,reference_function,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accuracy = 1.49e-05):
+def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accuracy = 1.49e-05):
     """
-    Solves the dynamic problem under fixed BC.
+    Solves the Helmholtz problem under fixed BC.
     :param mesh: The mesh to operate on
-    :param reference_function: The function for the initial condition
     :param f_function: The inhomogenous right hand side
     :param quadpack: Should the Fortran quadpack package be used to integrate numerically
     :param accuracy: The accuracy for quadpack
@@ -81,47 +81,105 @@ def solve_dynamic(mesh,reference_function,t_end,t_0 = 0,timestep = 0.01, quadpac
 
     b = np.zeros((varnr,1))
 
-    #"Window" BC Dirichlet
-    nr = np.shape(vertices)[1]
-    for i in range(varnr):
-        if vertices[1,i] == 0:
-            K[i,:] = np.zeros((1,nr))
-            K[i,i] = 1
-            b[i] = 0
-
-
-    for i in range(varnr):
-        if vertices[1,i] == 1:
-            K[i,:] = np.zeros((1,nr))
-            K[i,i] = 1
-            b[i] = 1
-
-
-
     A = -np.linalg.inv(M).dot(K)
+
+    #"Window" BC Dirichlet
+    #nr = np.shape(vertices)[1]
+    #for i in range(varnr):
+     #   if vertices[1,i] == 0:
+     #       A[i,:] = np.zeros((1,nr))
+     #       A[i,i] = 1
+
+
+    #for i in range(varnr):
+     #   if vertices[1,i] == 1:
+     #       A[i,:] = np.zeros((1,nr))
+     #       A[i,i] = 1
+
+
+    #nr = np.shape(vertices)[1]
+    #for i in range(varnr):
+    #    if vertices[0,i] == 0:
+    #        A[i,:] = np.zeros((1,nr))
+    #        A[i,i] = 1
+
+
+    #for i in range(varnr):
+    #    if vertices[0,i] == 1:
+    #        A[i,:] = np.zeros((1,nr))
+    #        A[i,i] = 1
+
+
+
     bm = np.linalg.inv(M).dot(b)
-    t_arr = np.arange(t_0, t_end, timestep)
-    nrtsteps = np.shape(t_arr)[0]
 
-    u = np.zeros((varnr,nrtsteps))
+    u = np.zeros((varnr,1))
 
 
+    print("[Info] Solving system in time domain")
+
+    u0 = np.ones_like(u[:,0])*0
+    for i in range(varnr):
+        if vertices[0,i] == 1 or vertices[0,i] == 0 or vertices[1,i] == 1 or vertices[1,i] == 0:
+            u0[i] = 0
+        elif (vertices[0,i]-0.5)**2 <= 0.2**2 and (vertices[1,i]-0.5)**2 <= 0.2**2:
+            u0[i] = 0.5-((vertices[0,i]-0.5)**2+(vertices[1,i]-0.5)**2)**(0.5)
 
 
 
-    u0 = np.ones_like(u[:,0])*0.7
+
+    v0 = np.ones_like(u[:, 0])*0
 
     #Non homogenous initial condition
     # u0 = u[:,0]
     #for i in range(varnr):
     #    u0[i] = reference_function.value(vertices[:,i],0)
 
-    for i in range(nrtsteps):
-        if i == 0:
-            u[:, 0] = u0
-        else:
-            u[:,i] = u[:,i-1]+timestep*(A.dot(u[:,i-1])+bm[:,0])
-    return t_arr, vertices, u
+    x0 = np.zeros((2*varnr))
+
+    x0[0:varnr] = u0
+    x0[varnr:] = v0
+
+    J = np.zeros((2*varnr,2*varnr))
+    J[0:varnr,varnr:] = np.eye(varnr)
+    J[varnr:,0:varnr] = A
+
+    t_arr = np.zeros((1,1))
+    x = x0
+    x = np.expand_dims(x,axis=1)
+    def system(t,y,J):
+        return y.dot(J)
+    ivp = RK45(fun=lambda t, y: system(t, y, J), t0=0, y0=x0, t_bound=t_end, max_step=timestep, rtol=0.001, atol=1e-06, vectorized=False)
+
+    while True:
+        if(ivp.t>=t_end):
+            break
+        ivp.step()
+        x = np.append(x,np.expand_dims(ivp.y,axis=1),axis=1)
+        t_arr = np.append(t_arr,np.ones((1,1))*ivp.t,axis=1)
+
+    print("[Info] Made "+str(t_arr.shape[1])+" timesetps")
+
+    #Todo: Beautify
+    print("[Info] Generating interpolator")
+    u = x[0:varnr]
+    data = np.zeros((3,t_arr.shape[1]*varnr))
+    value = np.zeros((1,t_arr.shape[1]*varnr))
+    value = np.squeeze(value)
+    i = 0
+    k = 0
+    t_arr = np.squeeze(t_arr)
+    for c in u.T:
+        for j in range(varnr):
+            data[0,i] = t_arr[k]
+            data[1:3,i] = mesh.vertices[:,j]
+            value[i] = c[j]
+            i+=1
+        k+=1
+
+    lnd = LinearNDInterpolator(data.T,value)
+
+    return lnd
 
 
 

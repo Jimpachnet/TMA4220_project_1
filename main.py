@@ -9,13 +9,14 @@ import numpy as np
 
 from u_tilde_function import UTildeFunction
 from u_function_tilde_dynamic import UTildeFunctionDynamic
-from visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix
+from visual_tools import plot_2d_function,plot_approx,plot_error,plot_dynamic_2d_function,show_matrix,plot_dynamic_2d_function_from_int,plot_dynamic_2d_function_from_int_plain
 from mesh import Mesh
 from f_function import FFunction
 from solver import solve
 from u_function import UFunction
 from error_analysis import calc_l2_error
 from dynamic_solver import solve_dynamic
+from dynamic_wave_solver import solve_wave_dynamic
 from u_function_dynamic import UFunctionDynamic
 
 def main():
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('-m', "--mesh", help="Generate mesh", action='store_true')
     parser.add_argument('-s', "--solve", help="Starts the solver", action='store_true')
     parser.add_argument('-sd', "--solvedynamic", help="Starts the dynamic solver", action='store_true')
+    parser.add_argument('-w', "--wave", help="Starts the dynamic solver for the wave equation", action='store_true')
     args = parser.parse_args()
 
     if args.visualize:
@@ -46,6 +48,10 @@ def main():
         u_cont = UFunctionDynamic(time,vertices,u)
         show_matrix(u)
         plot_dynamic_2d_function(u_cont,0.1, t0 = 0,timestep = 0.001,supports = 100)
+    elif args.wave:
+        mesh = Mesh(25, 25)
+        lnd = solve_wave_dynamic(mesh, 1, t_0=0, timestep=0.01)
+        plot_dynamic_2d_function_from_int(lnd, 1, t0=0, timestep=0.01, supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:
