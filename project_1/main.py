@@ -35,21 +35,20 @@ def main():
     elif args.mesh:
         mesh = Mesh(5,5)
         mesh.draw()
-
     elif args.solve:
         mesh = Mesh(25,25)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-        plot_triangulated_helmholtz(vertices,mesh, u)
+        plot_triangulated_helmholtz(mesh, u)
     elif args.solvedynamic:
         mesh = Mesh(10, 10)
         u_ref = UTildeFunctionDynamic()
         lnd = solve_dynamic(mesh,u_ref,0.2,t_0=0,timestep=0.01)
-        plot_dynamic_2d_function_from_int(lnd,0.2, t0 = 0,timestep = 0.01,supports = 100)
+        plot_dynamic_2d_function_from_int(lnd,0.2,mesh, t0 = 0,timestep = 0.01,supports = 100)
     elif args.wave:
-        mesh = Mesh(5,5)
-        lnd = solve_wave_dynamic(mesh, 0.5, t_0=0, timestep=0.1)
-        plot_dynamic_2d_function_from_int(lnd, 0.5, t0=0, timestep=0.1,minv=-0.5,maxv=0.5 ,supports=1000)
+        mesh = Mesh(15,15)
+        lnd = solve_wave_dynamic(mesh, 0.5, t_0=0, timestep=0.01)
+        plot_dynamic_2d_function_from_int(lnd, 0.5, mesh, t0=0, timestep=0.01,minv=-0.5,maxv=0.5 ,supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:

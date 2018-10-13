@@ -127,12 +127,13 @@ def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,su
 
 
 
-def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0,maxv = 1,filename="pde",supports = 100):
+def plot_dynamic_2d_function_from_int(lnd,t_end, mesh, t0 = 0,timestep = 0.01,minv = 0,maxv = 1,filename="pde",supports = 100):
     """
      Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
      to plot dynamic function
     :param lnd: Linear ND interpolator
     :param t_end: Time at which the simulation should end
+    :param mesh: Mesh object
     :param t0: Start time
     :param timestep: Time delta between evaluations
     :param minv: Minimal value of z axis
@@ -141,6 +142,7 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0
     :param supports: Nuber of supports
     """
 
+    verticies = mesh.vertices
 
     if type(supports) is int:
         perside = int(np.sqrt(supports))
@@ -159,8 +161,13 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0
 
     t_arr = np.arange(t0,t_end,timestep)
 
-    X, Y = np.meshgrid(x, y)
-    Z = np.zeros_like(X)
+    x = verticies[0, :]
+    y = verticies[1, :]
+    triangles = np.zeros((len(mesh.triangles), 3))
+    i = 0
+    for triangle in mesh.triangles:
+        triangles[i, :] = triangle.v
+        i += 1
 
     FFMpegWriter = manimation.writers['ffmpeg']
     metadata = dict(title='u', artist='Test',
@@ -170,28 +177,15 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, t0 = 0,timestep = 0.01,minv = 0
     with writer.saving(fig, filename+".mp4",dpi=300 ):
         for t in range(np.shape(t_arr)[0]):
             print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
-            ni = 0
-            for i in x:
-                nj = 0
-                for j in y:
-                    Z[ni, nj] = lnd((t_arr[t],i,j))
-                    nj += 1
-                ni += 1
-
             ax = fig.gca(projection='3d')
-            surf = ax.plot_surface(Y, X, Z, cmap=cm.plasma,
-                                   linewidth=0, antialiased=True)
-            # Todo X and Y axis seem to be turned
-            cbar = fig.colorbar(surf, shrink=0.5, aspect=5)
-            cbar.set_clim(minv,maxv)
+            cs = ax.plot_trisurf(x, y, np.squeeze(lnd(t_arr[t])), cmap=cm.plasma)
+            cbar = plt.colorbar(cs)
             plt.xlabel("x")
             plt.ylabel("y")
-
+            cbar.set_clim(minv,maxv)
             ax.set_zlim(minv,maxv)
             plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
             ax.view_init(30, -70)
-
-
             writer.grab_frame()
             plt.gcf().clear()
 
@@ -319,14 +313,13 @@ def plot_approx(vertices,u):
 
     plot_2d_function(calu,1000)
 
-def plot_triangulated_helmholtz(vertices,mesh,u):
+def plot_triangulated_helmholtz(mesh,u):
     """
     Plots the triangulated solution
-    :param vertices: The vertices array
     :param mesh: The mesh
     :param u: The solution
     """
-
+    vertices = mesh.vertices
     x = vertices[0,:]
     y = vertices[1,:]
 

@@ -11,7 +11,7 @@ from project_1.infrastructure.p1_reference_element import P1ReferenceElement
 from project_1.infrastructure.affine_transformation import AffineTransformation
 from project_1.utils.integration import gauss_legendre_reference
 from project_1.solvers.rk_45_fd_solver import solve_dynamic_system
-from scipy.interpolate import  LinearNDInterpolator
+from scipy.interpolate import  LinearNDInterpolator,interp1d
 
 
 def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accuracy = 1.49e-05):
@@ -148,23 +148,10 @@ def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accu
     #Todo: Beautify
     print("[Info] Generating interpolator")
     u = x[0:varnr]
-    data = np.zeros((3,t_arr.shape[1]*varnr))
-    value = np.zeros((1,t_arr.shape[1]*varnr))
-    value = np.squeeze(value)
-    i = 0
-    k = 0
     t_arr = np.squeeze(t_arr)
-    for c in u.T:
-        for j in range(varnr):
-            data[0,i] = t_arr[k]
-            data[1:3,i] = mesh.vertices[:,j]
-            value[i] = c[j]
-            i+=1
-        k+=1
+    f = interp1d(t_arr, u)
 
-    lnd = LinearNDInterpolator(data.T,value)
-
-    return lnd
+    return f
 
 
 
