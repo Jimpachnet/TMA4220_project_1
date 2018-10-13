@@ -118,8 +118,8 @@ def solve_wave_dynamic(mesh,t_end,t_0 = 0,timestep = 0.01, quadpack = False,accu
     for i in range(varnr):
         if vertices[0,i] == 1 or vertices[0,i] == 0 or vertices[1,i] == 1 or vertices[1,i] == 0:
             u0[i] = 0
-        elif (vertices[0,i]-0.5)**2 <= 0.2**2 and (vertices[1,i]-0.5)**2 <= 0.2**2:
-            u0[i] = 0.5-((vertices[0,i]-0.5)**2+(vertices[1,i]-0.5)**2)**(0.5)
+        elif (vertices[0,i]-0.5)**2 <= 0.0002**2 and (vertices[1,i]-0.5)**2 <= 0.0002**2:
+            u0[i] = 1-((vertices[0,i]-0.5)**2+(vertices[1,i]-0.5)**2)**(0.5)
 
 
 
