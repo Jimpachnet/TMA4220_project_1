@@ -20,3 +20,4 @@ The program is started by executing the main file located in the root. Without a
 ### Todo
 * Find axis 3d inversion bug
 * Check if boundary conditions are implemented right
+* Intgrating for b - how to incorporate determinant
