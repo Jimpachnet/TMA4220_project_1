@@ -7,4 +7,9 @@ setup(name='Project_1',
       author_email='leon.sievers@tum.de',
       url='https://github.com/Jimpachnet/TMA4220_project_1',
       packages=['distutils', 'distutils.command'],
+      install_requires=[
+          'scipy',
+          'matplotlib',
+          'numpy',
+      ],
      )
