@@ -44,12 +44,12 @@ def main():
     elif args.solvedynamic:
         mesh = Mesh(10, 10)
         u_ref = UTildeFunctionDynamic()
-        lnd = solve_dynamic(mesh, u_ref, 0.2, t_0=0, timestep=0.01)
-        plot_dynamic_2d_function_from_int(lnd, 0.2, mesh, t0=0, timestep=0.01, supports=100)
+        lnd = solve_dynamic(mesh, u_ref, 0.08, t_0=0, timestep=0.001)
+        plot_dynamic_2d_function_from_int(lnd, 0.08, mesh, t0=0, timestep=0.001, supports=100)
     elif args.wave:
         mesh = Mesh(25, 25)
-        lnd = solve_wave_dynamic(mesh, 3, t_0=0, timestep=0.01)
-        plot_dynamic_2d_function_from_int(lnd, 3, mesh, t0=0, timestep=0.01, minv=-0.5, maxv=0.5, supports=1000)
+        lnd = solve_wave_dynamic(mesh, 2, t_0=0, timestep=0.01)
+        plot_dynamic_2d_function_from_int(lnd, 2, mesh, t0=0, timestep=0.01, minv=-0.5, maxv=0.5, supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:

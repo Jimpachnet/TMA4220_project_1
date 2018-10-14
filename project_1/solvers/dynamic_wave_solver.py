@@ -24,6 +24,8 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     :return: An ND interpolator
     """
 
+    c = 0.5
+
     vertices = mesh.vertices
     triangles = mesh.triangles
     varnr = mesh.supportsy * mesh.supportsx
@@ -72,6 +74,7 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
                     ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
                                                         args=(p1_ref, i, j, jinvt, result))
                 K[tr_current.v[i], tr_current.v[j]] += atraf.get_determinant() * ans
+    K*=c**2
 
     # Leakage at (0,0)
     # K[0,:] *=0
@@ -82,27 +85,31 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     A = -np.linalg.inv(M).dot(K)
 
     # "Window" BC Dirichlet
-    # nr = np.shape(vertices)[1]
-    # for i in range(varnr):
-    #   if vertices[1,i] == 0:
-    #       A[i,:] = np.zeros((1,nr))
-    #       A[i,i] = 1
+    nr = np.shape(vertices)[1]
+    for i in range(varnr):
+      if vertices[1,i] == 0:
+          A[i,:] = np.zeros((1,nr))
+          A[i,i] = 1
 
-    # for i in range(varnr):
-    #   if vertices[1,i] == 1:
-    #       A[i,:] = np.zeros((1,nr))
-    #       A[i,i] = 1
+    for i in range(varnr):
+     if vertices[1,i] == 1:
+          A[i,:] = np.zeros((1,nr))
+          A[i,i] = 1
 
-    # nr = np.shape(vertices)[1]
-    # for i in range(varnr):
-    #    if vertices[0,i] == 0:
-    #        A[i,:] = np.zeros((1,nr))
-    #        A[i,i] = 1
+    nr = np.shape(vertices)[1]
+    for i in range(varnr):
+       if vertices[0,i] == 0:
+           A[i,:] = np.zeros((1,nr))
+           A[i,i] = 1
 
-    # for i in range(varnr):
-    #    if vertices[0,i] == 1:
-    #        A[i,:] = np.zeros((1,nr))
-    #        A[i,i] = 1
+    for i in range(varnr):
+       if vertices[0,i] == 1:
+           A[i,:] = np.zeros((1,nr))
+           A[i,i] = 1
+
+
+
+
 
     bm = np.linalg.inv(M).dot(b)
 
@@ -133,10 +140,15 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     J[0:varnr, varnr:] = np.eye(varnr)
     J[varnr:, 0:varnr] = A
 
-    def system(t, y, J):
-        return y.dot(J)
+    def system(t, y, args):
+        J = args[0]
+        b = args[1]
+        dy = J.dot(y)
+        varn = b.shape[0]
+        dy[varn:] +=b[:,0]
+        return J.dot(y)
 
-    x, t_arr = solve_dynamic_system(system, J, timestep, t_end, x0)
+    x, t_arr = solve_dynamic_system(system, (J,bm), timestep, t_end, x0)
 
     # Todo: Beautify
     print("[Info] Generating interpolator")

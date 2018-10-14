@@ -97,19 +97,22 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
             K[i, i] = 1
             b[i] = 1
 
-    for i in range(varnr):
-        if vertices[1, i] == 0:
-            K[i, :] = np.zeros((1, nr))
-            K[i, i] = 1
-            b[i] = 0
+    #for i in range(varnr):
+    #    if vertices[0, i] == 0:
+    #        K[i, :] = np.zeros((1, nr))
+    #        K[i, i] = 1
+    #        b[i] = 0
 
-    for i in range(varnr):
-        if vertices[1, i] == 1:
-            K[i, :] = np.zeros((1, nr))
-            K[i, i] = 1
-            b[i] = 1
+    #for i in range(varnr):
+    #    if vertices[0, i] == 1:
+    #        K[i, :] = np.zeros((1, nr))
+    #        K[i, i] = 1
+    #        b[i] = 1
 
-    A = -np.linalg.inv(M).dot(K)  # +np.linalg.inv(M).dot(b)
+
+
+    A = -np.linalg.inv(M).dot(K)
+
 
     t_arr = np.arange(t_0, t_end, timestep)
     nrtsteps = np.shape(t_arr)[0]
@@ -119,10 +122,12 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
     print("[Info] Solving system in time domain")
     u0 = np.ones_like(u[:, 0]) * 0.7
 
-    def system(t, y, J):
-        return y.dot(J)
+    def system(t, y, args):
+        J = args[0]
+        b = args[1]
+        return J.dot(y) + b
 
-    x, t_arr = solve_dynamic_system(system, A, timestep, t_end, u0)
+    x, t_arr = solve_dynamic_system(system, (A,np.linalg.inv(M).dot(b)), timestep, t_end, u0)
 
     # Todo: Beautify
     print("[Info] Generating interpolator")
