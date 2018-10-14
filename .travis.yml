@@ -4,7 +4,7 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
-  - pip install -e ./project-1
+  - pip install -e ./project_1
 before_script:
   - cd project_1/tests
 script:
