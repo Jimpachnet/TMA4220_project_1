@@ -49,7 +49,7 @@ def main():
     elif args.wave:
         mesh = Mesh(25, 25)
         lnd = solve_wave_dynamic(mesh, 2, t_0=0, timestep=0.01)
-        plot_dynamic_2d_function_from_int(lnd, 2, mesh, t0=0, timestep=0.01, minv=-0.5, maxv=0.5, supports=1000)
+        plot_dynamic_2d_function_from_int(lnd, 2, mesh, t0=0, timestep=0.01, minv=-0.2, maxv=0.2, supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     else:

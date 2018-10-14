@@ -134,14 +134,22 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
 
         for i in range(varnr):
             if vertices[1, i] == 1:
-                y[i] = np.sin(3*np.pi*t)*0.2
-        #for i in range(varnr):
-        #    if vertices[0, i] == 0:
-        #        y[i] = 0
+                if t<(1/3):
+                    y[i] = np.sin(3*np.pi*t)*0.2
+                else:
+                    y[i] = 0
 
-        #for i in range(varnr):
-        #    if vertices[0, i] == 1:
-        #        y[i] = 0
+        for i in range(varnr):
+            if vertices[1, i] <= 0.5 and vertices[0,i]<0.5:
+                y[i] = 0
+
+        for i in range(varnr):
+            if vertices[0, i] == 0:
+                y[i] = 0
+
+        for i in range(varnr):
+            if vertices[0, i] == 1:
+                y[i] = 0
 
         return y
 
