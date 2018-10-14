@@ -13,7 +13,7 @@ from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_2d_function(function_object,supports=100):
+def plot_2d_function(function_object, supports=100):
     """
     Plots a 2d function
     :param function_object: The function to be plottet. has to provide a .value(x) function.
@@ -23,19 +23,18 @@ def plot_2d_function(function_object,supports=100):
 
     if type(supports) is int:
         perside = int(np.sqrt(supports))
-        h = 1/(perside-1)
+        h = 1 / (perside - 1)
         coordinate_list = []
         for i in range(perside):
             for j in range(perside):
-                coordinate_list.append((i*h,j*h))
-        #Makes problems because of how the plot function works
+                coordinate_list.append((i * h, j * h))
+        # Makes problems because of how the plot function works
 
         x = np.linspace(0, 1, num=perside)
         y = np.linspace(0, 1, num=perside)
 
     else:
         raise NotImplementedError("To be implemented")
-
 
     X, Y = np.meshgrid(x, y)
     Z = np.zeros_like(X)
@@ -44,17 +43,16 @@ def plot_2d_function(function_object,supports=100):
     for i in x:
         nj = 0
         for j in y:
-            Z[ni,nj] = function_object.value((i,j))
-            nj+=1
-        ni+=1
-
+            Z[ni, nj] = function_object.value((i, j))
+            nj += 1
+        ni += 1
 
     # Plot the surface
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     surf = ax.plot_surface(Y, X, Z, cmap=cm.plasma,
                            linewidth=0, antialiased=True)
-    #Todo X and Y axis seem to be turned
+    # Todo X and Y axis seem to be turned
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.xlabel("x")
     plt.ylabel("y")
@@ -70,11 +68,7 @@ def plot_2d_function(function_object,supports=100):
     plt.show()
 
 
-
-
-
-
-def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,supports = 100):
+def plot_dynamic_2d_function_from_int_plain(lnd, t_end, t0=0, timestep=0.01, supports=100):
     """
      Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
      to plot dynamic function
@@ -87,12 +81,12 @@ def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,su
 
     if type(supports) is int:
         perside = int(np.sqrt(supports))
-        h = 1/(perside-1)
+        h = 1 / (perside - 1)
         coordinate_list = []
         for i in range(perside):
             for j in range(perside):
-                coordinate_list.append((i*h,j*h))
-        #Makes problems because of how the plot function works
+                coordinate_list.append((i * h, j * h))
+        # Makes problems because of how the plot function works
 
         x = np.linspace(0, 1, num=perside)
         y = np.linspace(0, 1, num=perside)
@@ -100,8 +94,7 @@ def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,su
     else:
         raise NotImplementedError("To be implemented")
 
-    t_arr = np.arange(t0,t_end,timestep)
-
+    t_arr = np.arange(t0, t_end, timestep)
 
     FFMpegWriter = manimation.writers['ffmpeg']
     metadata = dict(title='u', artist='Test',
@@ -109,25 +102,23 @@ def plot_dynamic_2d_function_from_int_plain(lnd,t_end, t0 = 0,timestep = 0.01,su
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
 
-    with writer.saving(fig, "wave_plain.mp4",dpi=300 ):
+    with writer.saving(fig, "wave_plain.mp4", dpi=300):
         for t in range(np.shape(t_arr)[0]):
-            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            print("[Info] Plotting timestep " + str(t) + "/" + str(np.shape(t_arr)[0]))
 
-            vals = np.zeros((perside,perside))
+            vals = np.zeros((perside, perside))
             for i in range(perside):
                 for j in range(perside):
-                    vals[i,j] = lnd((t_arr[t],i,j))
+                    vals[i, j] = lnd((t_arr[t], i, j))
 
             plt.imshow(vals)
-
 
             writer.grab_frame()
             plt.gcf().clear()
 
 
-
-
-def plot_dynamic_2d_function_from_int(lnd,t_end, mesh, t0 = 0,timestep = 0.01,minv = 0,maxv = 1,filename="pde",supports = 100):
+def plot_dynamic_2d_function_from_int(lnd, t_end, mesh, t0=0, timestep=0.01, minv=0, maxv=1, filename="pde",
+                                      supports=100):
     """
      Use Linear ND interpolator https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.LinearNDInterpolator.html#scipy.interpolate.LinearNDInterpolator
      to plot dynamic function
@@ -146,12 +137,12 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, mesh, t0 = 0,timestep = 0.01,mi
 
     if type(supports) is int:
         perside = int(np.sqrt(supports))
-        h = 1/(perside-1)
+        h = 1 / (perside - 1)
         coordinate_list = []
         for i in range(perside):
             for j in range(perside):
-                coordinate_list.append((i*h,j*h))
-        #Makes problems because of how the plot function works
+                coordinate_list.append((i * h, j * h))
+        # Makes problems because of how the plot function works
 
         x = np.linspace(0, 1, num=perside)
         y = np.linspace(0, 1, num=perside)
@@ -159,7 +150,7 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, mesh, t0 = 0,timestep = 0.01,mi
     else:
         raise NotImplementedError("To be implemented")
 
-    t_arr = np.arange(t0,t_end,timestep)
+    t_arr = np.arange(t0, t_end, timestep)
 
     x = verticies[0, :]
     y = verticies[1, :]
@@ -174,22 +165,23 @@ def plot_dynamic_2d_function_from_int(lnd,t_end, mesh, t0 = 0,timestep = 0.01,mi
                     comment='Works')
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
-    with writer.saving(fig, filename+".mp4",dpi=300 ):
+    with writer.saving(fig, filename + ".mp4", dpi=300):
         for t in range(np.shape(t_arr)[0]):
-            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            print("[Info] Plotting timestep " + str(t) + "/" + str(np.shape(t_arr)[0]))
             ax = fig.gca(projection='3d')
             cs = ax.plot_trisurf(x, y, np.squeeze(lnd(t_arr[t])), cmap=cm.plasma)
             cbar = plt.colorbar(cs)
             plt.xlabel("x")
             plt.ylabel("y")
-            cbar.set_clim(minv,maxv)
-            ax.set_zlim(minv,maxv)
-            plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
+            cbar.set_clim(minv, maxv)
+            ax.set_zlim(minv, maxv)
+            plt.title(r'$u(x),\ t=$' + str(round(t_arr[t], 3)) + "s")
             ax.view_init(30, -70)
             writer.grab_frame()
             plt.gcf().clear()
 
-def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.01,supports = 100):
+
+def plot_dynamic_2d_function(dynamic_function_object, t_end, t0=0, timestep=0.01, supports=100):
     """
     Plots a time dependant function
     :param dynamic_function_object: Time dependant function
@@ -200,12 +192,12 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
     """
     if type(supports) is int:
         perside = int(np.sqrt(supports))
-        h = 1/(perside-1)
+        h = 1 / (perside - 1)
         coordinate_list = []
         for i in range(perside):
             for j in range(perside):
-                coordinate_list.append((i*h,j*h))
-        #Makes problems because of how the plot function works
+                coordinate_list.append((i * h, j * h))
+        # Makes problems because of how the plot function works
 
         x = np.linspace(0, 1, num=perside)
         y = np.linspace(0, 1, num=perside)
@@ -213,7 +205,7 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
     else:
         raise NotImplementedError("To be implemented")
 
-    t_arr = np.arange(t0,t_end,timestep)
+    t_arr = np.arange(t0, t_end, timestep)
 
     X, Y = np.meshgrid(x, y)
     Z = np.zeros_like(X)
@@ -224,15 +216,15 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
 
-    with writer.saving(fig, "heat_hom3d.mp4",dpi=300 ):
+    with writer.saving(fig, "heat_hom3d.mp4", dpi=300):
         for t in range(np.shape(t_arr)[0]):
-            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            print("[Info] Plotting timestep " + str(t) + "/" + str(np.shape(t_arr)[0]))
             ni = 0
             for i in x:
                 nj = 0
                 for j in y:
                     prr = (i, j)
-                    Z[ni, nj] = dynamic_function_object.value(prr,t_arr[t])
+                    Z[ni, nj] = dynamic_function_object.value(prr, t_arr[t])
                     nj += 1
                 ni += 1
 
@@ -241,28 +233,26 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
                                    linewidth=0, antialiased=True)
             # Todo X and Y axis seem to be turned
             cbar = fig.colorbar(surf, shrink=0.5, aspect=5)
-            cbar.set_clim(0,1)
+            cbar.set_clim(0, 1)
             plt.xlabel("x")
             plt.ylabel("y")
 
-            ax.set_zlim(0,1)
-            plt.title(r'$u(x),\ t=$'+str(round(t_arr[t],3))+"s")
+            ax.set_zlim(0, 1)
+            plt.title(r'$u(x),\ t=$' + str(round(t_arr[t], 3)) + "s")
             ax.view_init(30, -70)
-
 
             writer.grab_frame()
             plt.gcf().clear()
 
-
-    with writer.saving(fig, "heat_hom.mp4",dpi=300 ):
+    with writer.saving(fig, "heat_hom.mp4", dpi=300):
         for t in range(np.shape(t_arr)[0]):
-            print("[Info] Plotting timestep "+str(t)+"/"+str(np.shape(t_arr)[0]))
+            print("[Info] Plotting timestep " + str(t) + "/" + str(np.shape(t_arr)[0]))
             ni = 0
             for i in x:
                 nj = 0
                 for j in y:
                     prr = (i, j)
-                    Z[ni, nj] = dynamic_function_object.value(prr,t_arr[t])
+                    Z[ni, nj] = dynamic_function_object.value(prr, t_arr[t])
                     nj += 1
                 ni += 1
 
@@ -274,7 +264,8 @@ def plot_dynamic_2d_function(dynamic_function_object,t_end, t0 = 0,timestep = 0.
             writer.grab_frame()
             plt.gcf().clear()
 
-def plot_approx(vertices,u):
+
+def plot_approx(vertices, u):
     """
     Plots an approximate solution
     :param vertices: The vertices array
@@ -284,7 +275,7 @@ def plot_approx(vertices,u):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    surf = ax.scatter(vertices[0, :], vertices[1, :], u)
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(r'$u(x)$')
@@ -293,7 +284,7 @@ def plot_approx(vertices,u):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    surf = ax.scatter(vertices[0, :], vertices[1, :], u)
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(r'$u(x)$')
@@ -302,37 +293,38 @@ def plot_approx(vertices,u):
 
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    surf = ax.scatter(vertices[0,:], vertices[1,:], u)
+    surf = ax.scatter(vertices[0, :], vertices[1, :], u)
     plt.xlabel("x")
     plt.ylabel("y")
     plt.title(r'$u(x)$')
-    ax.view_init(90,0)
+    ax.view_init(90, 0)
     plt.show()
 
-    calu = UFunction(u,vertices)
+    calu = UFunction(u, vertices)
 
-    plot_2d_function(calu,1000)
+    plot_2d_function(calu, 1000)
 
-def plot_triangulated_helmholtz(mesh,u):
+
+def plot_triangulated_helmholtz(mesh, u):
     """
     Plots the triangulated solution
     :param mesh: The mesh
     :param u: The solution
     """
     vertices = mesh.vertices
-    x = vertices[0,:]
-    y = vertices[1,:]
+    x = vertices[0, :]
+    y = vertices[1, :]
 
-    triangles = np.zeros((len(mesh.triangles),3))
+    triangles = np.zeros((len(mesh.triangles), 3))
 
     i = 0
     for triangle in mesh.triangles:
-        triangles[i,:] = triangle.v
-        i+=1
+        triangles[i, :] = triangle.v
+        i += 1
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    cs = ax.plot_trisurf(x,y,np.squeeze(u), cmap=cm.plasma)
+    cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma)
     cbar = plt.colorbar(cs)
     plt.xlabel("x")
     plt.ylabel("y")
@@ -341,19 +333,22 @@ def plot_triangulated_helmholtz(mesh,u):
     plt.show()
 
 
-
-def plot_error(trials,errors):
+def plot_error(trials, errors, errors_app):
     """
     Plot error over different mesh sizes
     :param trials: Used mesh sizes
     :param errors: calculated error
+    :param errors_app: Errors calculated by an approximation method
     """
 
-    plt.plot(trials,errors)
+    plt.plot(trials, errors)
+    plt.plot(trials, errors_app)
     plt.xlabel("M")
     plt.ylabel("L2 error")
+    plt.legend(['Quadpack', 'Gauss-Legendre'])
     plt.grid()
     plt.show()
+
 
 def show_matrix(matrix):
     """
@@ -364,16 +359,18 @@ def show_matrix(matrix):
     plt.colorbar()
     plt.show()
 
+
 def visualize_u_tilde():
     """
     Visualize u_tilde
     """
     u = UTildeFunction()
-    plot_2d_function(u,100000)
+    plot_2d_function(u, 100000)
+
 
 def visualize_u_tilde_dynamic():
     """
     Visualize u_tilde_dynamic
     """
     u = UTildeFunctionDynamic()
-    plot_dynamic_2d_function(u,t_end=5,t0=0,timestep=0.1,supports=1000)
+    plot_dynamic_2d_function(u, t_end=5, t0=0, timestep=0.1, supports=1000)
