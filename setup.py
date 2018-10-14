@@ -12,6 +12,6 @@ setup(name='Project_1',
           'scipy',
           'matplotlib',
           'numpy',
-          'tqdm,'
+          'tqdm',
       ],
      )
