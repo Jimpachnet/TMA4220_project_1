@@ -1,3 +1,4 @@
+from setuptools import find_packages
 from distutils.core import setup
 
 setup(name='Project_1',
@@ -6,7 +7,7 @@ setup(name='Project_1',
       author='Leon Sievers, Thibault Gaudet',
       author_email='leon.sievers@tum.de',
       url='https://github.com/Jimpachnet/TMA4220_project_1',
-      packages=['distutils', 'distutils.command'],
+      packages=find_packages(),
       install_requires=[
           'scipy',
           'matplotlib',
