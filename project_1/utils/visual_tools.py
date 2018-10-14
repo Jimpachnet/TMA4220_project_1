@@ -6,11 +6,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as manimation
+import tqdm
 from matplotlib import cm
 from project_1.functions.u_function import UFunction
 from project_1.functions.u_tilde_function import UTildeFunction
 from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from mpl_toolkits.mplot3d import Axes3D
+
 
 
 def plot_2d_function(function_object, supports=100):
@@ -165,9 +167,9 @@ def plot_dynamic_2d_function_from_int(lnd, t_end, mesh, t0=0, timestep=0.01, min
                     comment='Works')
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
+    print("[Info] Generating animation frames...")
     with writer.saving(fig, filename + ".mp4", dpi=300):
-        for t in range(np.shape(t_arr)[0]):
-            print("[Info] Plotting timestep " + str(t) + "/" + str(np.shape(t_arr)[0]))
+        for t in tqdm.tqdm(range(np.shape(t_arr)[0])):
             ax = fig.gca(projection='3d')
             cs = ax.plot_trisurf(x, y, np.squeeze(lnd(t_arr[t])), cmap=cm.plasma)
             cbar = plt.colorbar(cs)

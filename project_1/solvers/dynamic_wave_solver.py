@@ -86,29 +86,6 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
 
     # "Window" BC Dirichlet
     nr = np.shape(vertices)[1]
-    for i in range(varnr):
-      if vertices[1,i] == 0:
-          A[i,:] = np.zeros((1,nr))
-          A[i,i] = 1
-
-    for i in range(varnr):
-     if vertices[1,i] == 1:
-          A[i,:] = np.zeros((1,nr))
-          A[i,i] = 1
-
-    nr = np.shape(vertices)[1]
-    for i in range(varnr):
-       if vertices[0,i] == 0:
-           A[i,:] = np.zeros((1,nr))
-           A[i,i] = 1
-
-    for i in range(varnr):
-       if vertices[0,i] == 1:
-           A[i,:] = np.zeros((1,nr))
-           A[i,i] = 1
-
-
-
 
 
     bm = np.linalg.inv(M).dot(b)
@@ -118,11 +95,11 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     print("[Info] Solving system in time domain")
 
     u0 = np.ones_like(u[:, 0]) * 0
-    for i in range(varnr):
-        if vertices[0, i] == 1 or vertices[0, i] == 0 or vertices[1, i] == 1 or vertices[1, i] == 0:
-            u0[i] = 0
-        elif (vertices[0, i] - 0.5) ** 2 <= 0.0002 ** 2 and (vertices[1, i] - 0.5) ** 2 <= 0.0002 ** 2:
-            u0[i] = 1 - ((vertices[0, i] - 0.5) ** 2 + (vertices[1, i] - 0.5) ** 2) ** (0.5)
+    #for i in range(varnr):
+    #    if vertices[0, i] == 1 or vertices[0, i] == 0 or vertices[1, i] == 1 or vertices[1, i] == 0:
+    #        u0[i] = 0
+    #    elif (vertices[0, i] - 0.5) ** 2 <= 0.0002 ** 2 and (vertices[1, i] - 0.5) ** 2 <= 0.0002 ** 2:
+    #        u0[i] = 1 - ((vertices[0, i] - 0.5) ** 2 + (vertices[1, i] - 0.5) ** 2) ** (0.5)
 
     v0 = np.ones_like(u[:, 0]) * 0
 
@@ -148,7 +125,35 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
         dy[varn:] +=b[:,0]
         return J.dot(y)
 
-    x, t_arr = solve_dynamic_system(system, (J,bm), timestep, t_end, x0)
+    def bc_imposer(y,t,args):
+        varnr = args[0]
+        vertices = args[1]
+        #for i in range(varnr):
+        #    if vertices[1, i] == 0:
+        #        y[i] = 0
+
+        for i in range(varnr):
+            if vertices[1, i] == 1:
+                if t<(1/3):
+                    y[i] = np.sin(3*np.pi*t)*0.2
+                else:
+                    y[i] = 0
+
+        for i in range(varnr):
+            if vertices[1, i] <= 0.5 and vertices[0,i]<0.5:
+                y[i] = 0
+
+        for i in range(varnr):
+            if vertices[0, i] == 0:
+                y[i] = 0
+
+        for i in range(varnr):
+            if vertices[0, i] == 1:
+                y[i] = 0
+
+        return y
+
+    x, t_arr = solve_dynamic_system(system, (J,bm), timestep, t_end, x0,bc_imposer=bc_imposer,bc_args=(varnr,vertices))
 
     # Todo: Beautify
     print("[Info] Generating interpolator")
