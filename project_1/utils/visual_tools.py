@@ -272,7 +272,6 @@ def plot_approx(vertices, u):
     Plots an approximate solution
     :param vertices: The vertices array
     :param u: The solution
-    :return:
     """
 
     fig = plt.figure()
