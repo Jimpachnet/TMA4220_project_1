@@ -28,6 +28,7 @@ def main():
     parser.add_argument('-s', "--solve", help="Starts the solver", action='store_true')
     parser.add_argument('-sd', "--solvedynamic", help="Starts the dynamic solver", action='store_true')
     parser.add_argument('-w', "--wave", help="Starts the dynamic solver for the wave equation", action='store_true')
+    parser.add_argument('-r', "--reportplots", help="Plots graphics for the report", action='store_true')
     args = parser.parse_args()
 
     if args.visualize:
@@ -52,6 +53,8 @@ def main():
         plot_dynamic_2d_function_from_int(lnd, 2, mesh, t0=0, timestep=0.01, minv=-0.2, maxv=0.2, supports=1000)
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
+    elif args.reportplots:
+        visualize_nodal_basis()
     else:
         h_tests = np.array([2, 3, 4, 8, 16, 32, 64, 128])
         errors = np.zeros_like(h_tests, dtype=float)
