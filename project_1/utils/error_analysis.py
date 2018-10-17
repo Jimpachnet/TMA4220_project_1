@@ -72,5 +72,5 @@ def calc_l2_error_simplex_based(mesh, u_tilde_function, u):
         det = atraf.get_determinant()
         ans, err = gauss_legendre_reference(error_integrant_reference,
                                             args=(p1_ref, u_tilde_function, j, v0_coord, det, u_vals))
-        error += ans
+        error += ans*np.abs(det)
     return np.sqrt(error)

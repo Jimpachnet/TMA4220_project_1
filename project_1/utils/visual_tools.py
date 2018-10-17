@@ -12,6 +12,7 @@ from project_1.functions.u_function import UFunction
 from project_1.functions.u_tilde_function import UTildeFunction
 from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection,Line3DCollection
 
 
 
@@ -375,3 +376,39 @@ def visualize_u_tilde_dynamic():
     """
     u = UTildeFunctionDynamic()
     plot_dynamic_2d_function(u, t_end=5, t0=0, timestep=0.1, supports=1000)
+
+def visualize_nodal_basis_old():
+    """
+    Makes plots for the report
+    """
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    x = [1,0,0]
+    y = [0,1,0]
+    z = [0,0,1]
+    verts = [list(zip(x, y, z))]
+    print(verts)
+    ax.add_collection3d(Poly3DCollection(verts), zs='z')
+    plt.show()
+
+
+def visualize_nodal_basis():
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    x = [1, 0, 0, 0]
+    y = [0, 1, 0, 0]
+    z = [0, 0, 1, 0]
+
+    vertices = [[0, 0, 0], [1, 0, 3], [0, 2, 3], [1, 2, 3]]
+
+    tupleList = list(zip(x, y, z))
+
+    poly3d = [[tupleList[vertices[ix][iy]] for iy in range(len(vertices[0]))] for ix in range(len(vertices))]
+    ax.scatter(x, y, z)
+    ax.add_collection3d(Poly3DCollection(poly3d, facecolors='blue', linewidths=1, alpha=0.5))
+    ax.add_collection3d(Line3DCollection(poly3d, colors='k', linewidths=2, linestyles=':'))
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    plt.show()
