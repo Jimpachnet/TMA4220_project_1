@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as manimation
 import tqdm
 from matplotlib import cm
+from project_1.utils.integration import *
+from project_1.infrastructure.p1_reference_element import *
+from project_1.infrastructure.affine_transformation import *
 from project_1.functions.u_function import UFunction
 from project_1.functions.u_tilde_function import UTildeFunction
 from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
@@ -401,7 +404,8 @@ def vis_all():
     """
 
     #visualize_nodal_basis()
-    visualize_Gauss_Legendre_1d()
+    #visualize_Gauss_Legendre_1d()
+    visualize_Gauss_Legendre_2d()
 
 def visualize_nodal_basis():
     fig = plt.figure()
@@ -446,15 +450,77 @@ def visualize_Gauss_Legendre_1d():
 
 
     #4
-    weights = np.array([(18-np.sqrt(30))/36*l,(18-np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l])
+    weights = np.array([(18-np.sqrt(30))/36*l,(18-np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l])/2
     points = np.array([xi+l*((np.sqrt(525+70*np.sqrt(30)))/70),xi-l*((np.sqrt(525+70*np.sqrt(30)))/70),xi+l*((np.sqrt(525-70*np.sqrt(30)))/70),xi-l*((np.sqrt(525-70*np.sqrt(30)))/70)])
-    vals[3] = np.sum(weights * np.e ** points)/2
-
-    print(weights)
+    vals[3] = np.sum(weights * np.e ** points)
 
     corr = np.e**2-np.e**1
 
-    error = (vals-corr)**2
+    error = np.sqrt((vals-corr)**2)
 
-    plt.plot(np.log(error))
-    plt.show()
+    plt.semilogy([1,2,3,4],error)
+    plt.title('Approximation Error Gauss-Legendre quadrature on $\mathbb{R}^1$')
+    plt.grid(True)
+    plt.xticks(np.arange(1, 5, step=1))
+    plt.xlabel('$N_q$')
+    plt.ylabel('$||e||_2$', rotation=0, labelpad=20)
+    plt.rcParams['xtick.labelsize']= 16
+    plt.rcParams['ytick.labelsize']= 16
+    plt.rcParams['font.size']= 15
+    plt.rcParams['figure.autolayout']= True
+    plt.rcParams['figure.figsize']= 7.2,4.45
+    plt.rcParams['axes.titlesize']= 16
+    plt.rcParams['axes.labelsize']= 17
+    plt.rcParams['lines.linewidth']= 2
+    plt.rcParams['lines.markersize']= 6
+    plt.rcParams['legend.fontsize']= 13
+    plt.rcParams['mathtext.fontset']= 'stix'
+    plt.rcParams['font.family']= 'STIXGeneral'
+    plt.savefig('gl_line_error.eps', format='eps', dpi=1000)
+    
+    
+def visualize_Gauss_Legendre_2d():
+    def b_integrant_reference(y, x, p1_ref, i, j, v0_coord, det):
+        co = (x, y)
+        xc = np.array([[x], [y]])
+        x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
+        x_new = j.dot(xc) + x0
+        return np.asscalar(p1_ref.value(co)[i] * np.log(x_new[0]+x_new[1])) * det
+    
+    p1_ref = P1ReferenceElement()
+    atraf = AffineTransformation()
+    atraf.set_target_cell((1,0),(3,1),(3,2))
+    v0_coord = ((1,0))
+    j = atraf.get_jacobian()
+    det = atraf.get_determinant()
+    totalint = 0
+    for i in range(3):
+        ans, err = gauss_legendre_reference(b_integrant_reference,args=(p1_ref, i, j, v0_coord, det))
+        totalint +=ans
+        
+    print(totalint)
+
+    corr = np.e**2-np.e**1
+
+    error = np.sqrt((vals-corr)**2)
+
+    plt.semilogy([1,2,3,4],error)
+    plt.title('Approximation Error Gauss-Legendre quadrature on $\mathbb{R}^1$')
+    plt.grid(True)
+    plt.xticks(np.arange(1, 5, step=1))
+    plt.xlabel('$N_q$')
+    plt.ylabel('$||e||_2$', rotation=0, labelpad=20)
+    plt.rcParams['xtick.labelsize']= 16
+    plt.rcParams['ytick.labelsize']= 16
+    plt.rcParams['font.size']= 15
+    plt.rcParams['figure.autolayout']= True
+    plt.rcParams['figure.figsize']= 7.2,4.45
+    plt.rcParams['axes.titlesize']= 16
+    plt.rcParams['axes.labelsize']= 17
+    plt.rcParams['lines.linewidth']= 2
+    plt.rcParams['lines.markersize']= 6
+    plt.rcParams['legend.fontsize']= 13
+    plt.rcParams['mathtext.fontset']= 'stix'
+    plt.rcParams['font.family']= 'STIXGeneral'
+    plt.savefig('gl_triangle_error.eps', format='eps', dpi=1000)
+    
