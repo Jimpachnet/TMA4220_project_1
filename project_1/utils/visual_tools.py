@@ -480,6 +480,8 @@ def visualize_Gauss_Legendre_1d():
     
     
 def visualize_Gauss_Legendre_2d():
+    true_value = 1.1654;
+    
     def b_integrant_reference(y, x, p1_ref, i, j, v0_coord, det):
         co = (x, y)
         xc = np.array([[x], [y]])
@@ -493,21 +495,23 @@ def visualize_Gauss_Legendre_2d():
     v0_coord = ((1,0))
     j = atraf.get_jacobian()
     det = atraf.get_determinant()
-    totalint = 0
-    for i in range(3):
-        ans, err = gauss_legendre_reference(b_integrant_reference,args=(p1_ref, i, j, v0_coord, det))
-        totalint +=ans
-        
-    print(totalint)
+    
+    supps =np.array([1,3,4,7],dtype='int')
+    vals = np.zeros_like(supps,dtype='float')
+    for inter, value in np.ndenumerate(supps):
+        totalint = 0
+        for i in range(3):
+            ans, err = gauss_legendre_reference(b_integrant_reference,args=(p1_ref, i, j, v0_coord, det),supports = value)
+            totalint +=ans
+        vals[inter[0]] = totalint
 
-    corr = np.e**2-np.e**1
+    
+    error = np.sqrt((vals-true_value)**2)
 
-    error = np.sqrt((vals-corr)**2)
-
-    plt.semilogy([1,2,3,4],error)
-    plt.title('Approximation Error Gauss-Legendre quadrature on $\mathbb{R}^1$')
+    plt.semilogy(supps,error)
+    plt.title('Approximation Error Gauss-Legendre quadrature on $\mathbb{R}^2$')
     plt.grid(True)
-    plt.xticks(np.arange(1, 5, step=1))
+    plt.xticks(supps)
     plt.xlabel('$N_q$')
     plt.ylabel('$||e||_2$', rotation=0, labelpad=20)
     plt.rcParams['xtick.labelsize']= 16
