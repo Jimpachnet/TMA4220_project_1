@@ -54,7 +54,7 @@ def main():
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     elif args.reportplots:
-        visualize_nodal_basis()
+        vis_all()
     else:
         h_tests = np.array([2, 3, 4, 8, 16, 32, 64, 128])
         errors = np.zeros_like(h_tests, dtype=float)

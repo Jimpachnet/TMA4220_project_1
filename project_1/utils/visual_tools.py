@@ -392,6 +392,17 @@ def visualize_nodal_basis_old():
     plt.show()
 
 
+
+
+def vis_all():
+    """
+    Create plots for report
+    :return:
+    """
+
+    #visualize_nodal_basis()
+    visualize_Gauss_Legendre_1d()
+
 def visualize_nodal_basis():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -411,4 +422,39 @@ def visualize_nodal_basis():
     plt.xlabel("x")
     plt.ylabel("y")
 
+    plt.show()
+
+def visualize_Gauss_Legendre_1d():
+    a = 1
+    b = 2
+
+    vals = np.zeros(4)
+    xi = (a+b)/2
+    l = np.abs(a-b)
+
+    #1
+    vals[0] = (np.e**xi)*l
+
+    #2
+    vals[1] = (np.e**(xi+l*(np.sqrt(3)/6)))*0.5*l
+    vals[1] += (np.e ** (xi - l * (np.sqrt(3) / 6))) * 0.5 * l
+
+    #3
+    weights = np.array([(5/18)*l,(5/18)*l,(8/18)*l])
+    points = np.array([xi+l*(np.sqrt(15)/10),xi-l*(np.sqrt(15)/10),xi])
+    vals[2] = np.sum( weights*np.e**points)
+
+
+    #4
+    weights = np.array([(18-np.sqrt(30))/36*l,(18-np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l])
+    points = np.array([xi+l*((np.sqrt(525+70*np.sqrt(30)))/70),xi-l*((np.sqrt(525+70*np.sqrt(30)))/70),xi+l*((np.sqrt(525-70*np.sqrt(30)))/70),xi-l*((np.sqrt(525-70*np.sqrt(30)))/70)])
+    vals[3] = np.sum(weights * np.e ** points)/2
+
+    print(weights)
+
+    corr = np.e**2-np.e**1
+
+    error = (vals-corr)**2
+
+    plt.plot(np.log(error))
     plt.show()
