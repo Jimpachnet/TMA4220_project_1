@@ -38,7 +38,7 @@ def main():
         mesh = Mesh(5, 5)
         mesh.draw()
     elif args.solve:
-        mesh = Mesh(25, 25)
+        mesh = Mesh(10, 25)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
         plot_triangulated_helmholtz(mesh, u)
@@ -56,7 +56,7 @@ def main():
     elif args.reportplots:
         vis_all()
     else:
-        h_tests = np.array([2, 3, 4, 8, 16, 32, 64, 128])
+        h_tests = np.array([2, 3, 4, 8, 16, 32, 64])
         errors = np.zeros_like(h_tests, dtype=float)
         errors_app = np.zeros_like(h_tests, dtype=float)
         i = 0
@@ -67,7 +67,7 @@ def main():
             vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
             u_func = UFunction(u, vertices)
             u_tilde_func = UTildeFunction()
-            e =  calc_l2_error(u_func,u_tilde_func)
+            e =  0#calc_l2_error(u_func,u_tilde_func)
             ea = calc_l2_error_simplex_based(mesh, u_tilde_func, u)
             errors[i] = e
             errors_app[i] = ea

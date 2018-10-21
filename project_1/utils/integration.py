@@ -55,9 +55,9 @@ def gauss_legendre_reference(integrand, args,supports = 7):
         argsp = barycentric_to_cartesian_reference(1 / 5, 1 / 5, 1 / 3) + args
         value += integrand(*argsp) * (25/48)
         argsp = barycentric_to_cartesian_reference(1 / 5, 1 / 3, 1 / 5) + args
-        value += integrand(*argsp) * (-9/16)
+        value += integrand(*argsp) * (25/48)
         argsp = barycentric_to_cartesian_reference(1 / 3, 1 / 5, 1 / 5) + args
-        value += integrand(*argsp) * (-9/16)
+        value += integrand(*argsp) * (25/48)
         return value, 0
     elif supports == 3:
         value = 0
@@ -87,3 +87,31 @@ def barycentric_to_cartesian_reference(l1, l2, l3):
     y = (l3) / (l1 + l2 + l3)
 
     return (y, x)
+
+
+def gauss_legendre_r1_test(evaluations,a,b):
+    """
+    Evaluates the integral \int_1^2 e^x dx using the Gauss-Legendre quadrature
+    :param evaluations: Number of evaluations from 1 to 4
+    :param a: Lower bound
+    :param b: Upper bound
+    :return: The evaluation of the integral
+    """
+    xi = (a+b)/2
+    l = np.abs(a-b)
+
+
+    if evaluations == 1:
+        return (np.e**xi)*l
+    elif evaluations == 2:
+        v = (np.e**(xi+l*(np.sqrt(3)/6)))*0.5*l
+        v += (np.e ** (xi - l * (np.sqrt(3) / 6))) * 0.5 * l
+        return v
+    elif evaluations == 3:
+        weights = np.array([(5/18)*l,(5/18)*l,(8/18)*l])
+        points = np.array([xi+l*(np.sqrt(15)/10),xi-l*(np.sqrt(15)/10),xi])
+        return np.sum( weights*np.e**points)
+    elif evaluations == 4:
+        weights = np.array([(18-np.sqrt(30))/36*l,(18-np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l])/2
+        points = np.array([xi+l*((np.sqrt(525+70*np.sqrt(30)))/70),xi-l*((np.sqrt(525+70*np.sqrt(30)))/70),xi+l*((np.sqrt(525-70*np.sqrt(30)))/70),xi-l*((np.sqrt(525-70*np.sqrt(30)))/70)])
+        return np.sum(weights * np.e ** points)

@@ -407,6 +407,11 @@ def vis_all():
     #visualize_Gauss_Legendre_1d()
     visualize_Gauss_Legendre_2d()
 
+    #atraf = AffineTransformation()
+    #atraf.set_target_cell((0, 0), (0, 1), (1, 0))
+    #print(atraf.get_determinant())
+
+
 def visualize_nodal_basis():
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -429,30 +434,12 @@ def visualize_nodal_basis():
     plt.show()
 
 def visualize_Gauss_Legendre_1d():
-    a = 1
-    b = 2
 
     vals = np.zeros(4)
-    xi = (a+b)/2
-    l = np.abs(a-b)
 
-    #1
-    vals[0] = (np.e**xi)*l
+    for i in range(4):
+        vals[i] = gauss_legendre_r1_test(i+1,1,2)
 
-    #2
-    vals[1] = (np.e**(xi+l*(np.sqrt(3)/6)))*0.5*l
-    vals[1] += (np.e ** (xi - l * (np.sqrt(3) / 6))) * 0.5 * l
-
-    #3
-    weights = np.array([(5/18)*l,(5/18)*l,(8/18)*l])
-    points = np.array([xi+l*(np.sqrt(15)/10),xi-l*(np.sqrt(15)/10),xi])
-    vals[2] = np.sum( weights*np.e**points)
-
-
-    #4
-    weights = np.array([(18-np.sqrt(30))/36*l,(18-np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l,(18+np.sqrt(30))/36*l])/2
-    points = np.array([xi+l*((np.sqrt(525+70*np.sqrt(30)))/70),xi-l*((np.sqrt(525+70*np.sqrt(30)))/70),xi+l*((np.sqrt(525-70*np.sqrt(30)))/70),xi-l*((np.sqrt(525-70*np.sqrt(30)))/70)])
-    vals[3] = np.sum(weights * np.e ** points)
 
     corr = np.e**2-np.e**1
 
@@ -463,7 +450,7 @@ def visualize_Gauss_Legendre_1d():
     plt.grid(True)
     plt.xticks(np.arange(1, 5, step=1))
     plt.xlabel('$N_q$')
-    plt.ylabel('$||e||_2$', rotation=0, labelpad=20)
+    plt.ylabel('$||e||_2$', rotation=0, labelpad=15)
     plt.rcParams['xtick.labelsize']= 16
     plt.rcParams['ytick.labelsize']= 16
     plt.rcParams['font.size']= 15
@@ -487,7 +474,7 @@ def visualize_Gauss_Legendre_2d():
         xc = np.array([[x], [y]])
         x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
         x_new = j.dot(xc) + x0
-        return np.asscalar(p1_ref.value(co)[i] * np.log(x_new[0]+x_new[1])) * det
+        return np.asscalar(p1_ref.value(co)[i] * np.log(x_new[0]+x_new[1])) * np.abs(det)
     
     p1_ref = P1ReferenceElement()
     atraf = AffineTransformation()
@@ -513,7 +500,7 @@ def visualize_Gauss_Legendre_2d():
     plt.grid(True)
     plt.xticks(supps)
     plt.xlabel('$N_q$')
-    plt.ylabel('$||e||_2$', rotation=0, labelpad=20)
+    plt.ylabel('$||e||_2$', rotation=0, labelpad=15)
     plt.rcParams['xtick.labelsize']= 16
     plt.rcParams['ytick.labelsize']= 16
     plt.rcParams['font.size']= 15
