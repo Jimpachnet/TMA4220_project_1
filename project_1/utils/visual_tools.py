@@ -16,6 +16,11 @@ from project_1.functions.u_tilde_function import UTildeFunction
 from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection,Line3DCollection
+from project_1.infrastructure.mesh import Mesh
+from project_1.functions.f_function import FFunction
+from project_1.solvers.solver_helmholtz import solve_helmholtz
+from project_1.functions.u_function import UFunction
+from project_1.utils.error_analysis import calc_l2_error, calc_l2_error_simplex_based
 
 
 
@@ -172,17 +177,29 @@ def plot_dynamic_2d_function_from_int(lnd, t_end, mesh, t0=0, timestep=0.01, min
     writer = FFMpegWriter(fps=15, metadata=metadata)
     fig = plt.figure()
     print("[Info] Generating animation frames...")
-    with writer.saving(fig, filename + ".mp4", dpi=300):
+    with writer.saving(fig, filename + ".mp4", dpi=1000):
         for t in tqdm.tqdm(range(np.shape(t_arr)[0])):
             ax = fig.gca(projection='3d')
             cs = ax.plot_trisurf(x, y, np.squeeze(lnd(t_arr[t])), cmap=cm.plasma)
             cbar = plt.colorbar(cs)
             plt.xlabel("x")
-            plt.ylabel("y")
+            plt.ylabel("y", labelpad=20)
             cbar.set_clim(minv, maxv)
             ax.set_zlim(minv, maxv)
-            plt.title(r'$u(x),\ t=$' + str(round(t_arr[t], 3)) + "s")
+            plt.title(r'$u(x,t),\ t=$' + str(round(t_arr[t], 3)) + "s")
             ax.view_init(30, -70)
+            plt.rcParams['xtick.labelsize'] = 16
+            plt.rcParams['ytick.labelsize'] = 16
+            plt.rcParams['font.size'] = 15
+            plt.rcParams['figure.autolayout'] = True
+            plt.rcParams['figure.figsize'] = 7.2, 4.45
+            plt.rcParams['axes.titlesize'] = 16
+            plt.rcParams['axes.labelsize'] = 17
+            plt.rcParams['lines.linewidth'] = 2
+            plt.rcParams['lines.markersize'] = 6
+            plt.rcParams['legend.fontsize'] = 13
+            plt.rcParams['mathtext.fontset'] = 'stix'
+            plt.rcParams['font.family'] = 'STIXGeneral'
             writer.grab_frame()
             plt.gcf().clear()
 
@@ -246,7 +263,18 @@ def plot_dynamic_2d_function(dynamic_function_object, t_end, t0=0, timestep=0.01
             ax.set_zlim(0, 1)
             plt.title(r'$u(x),\ t=$' + str(round(t_arr[t], 3)) + "s")
             ax.view_init(30, -70)
-
+            plt.rcParams['xtick.labelsize'] = 16
+            plt.rcParams['ytick.labelsize'] = 16
+            plt.rcParams['font.size'] = 15
+            plt.rcParams['figure.autolayout'] = True
+            plt.rcParams['figure.figsize'] = 7.2, 4.45
+            plt.rcParams['axes.titlesize'] = 16
+            plt.rcParams['axes.labelsize'] = 17
+            plt.rcParams['lines.linewidth'] = 2
+            plt.rcParams['lines.markersize'] = 6
+            plt.rcParams['legend.fontsize'] = 13
+            plt.rcParams['mathtext.fontset'] = 'stix'
+            plt.rcParams['font.family'] = 'STIXGeneral'
             writer.grab_frame()
             plt.gcf().clear()
 
@@ -405,7 +433,9 @@ def vis_all():
 
     #visualize_nodal_basis()
     #visualize_Gauss_Legendre_1d()
-    visualize_Gauss_Legendre_2d()
+    #visualize_Gauss_Legendre_2d()
+    visualize_Helmholtz()
+    #visualizeMeshError()
 
     #atraf = AffineTransformation()
     #atraf.set_target_cell((0, 0), (0, 1), (1, 0))
@@ -464,10 +494,11 @@ def visualize_Gauss_Legendre_1d():
     plt.rcParams['mathtext.fontset']= 'stix'
     plt.rcParams['font.family']= 'STIXGeneral'
     plt.savefig('gl_line_error.eps', format='eps', dpi=1000)
-    
+    plt.clf()
     
 def visualize_Gauss_Legendre_2d():
-    true_value = 1.1654;
+    #true_value = 1.1654 MATLAB
+    true_value=1.165417027 #Maple
     
     def b_integrant_reference(y, x, p1_ref, i, j, v0_coord, det):
         co = (x, y)
@@ -514,4 +545,190 @@ def visualize_Gauss_Legendre_2d():
     plt.rcParams['mathtext.fontset']= 'stix'
     plt.rcParams['font.family']= 'STIXGeneral'
     plt.savefig('gl_triangle_error.eps', format='eps', dpi=1000)
+    plt.clf()
     
+def visualizeMeshError():
+    h_tests = np.array([2, 4, 8, 16, 32, 64])
+    #h_tests = np.array([2, 3, 4, 8])
+    errors = np.zeros_like(h_tests, dtype=float)
+    errors_app = np.zeros_like(h_tests, dtype=float)
+    i = 0
+    for d in np.nditer(h_tests):
+        print("[Info] M=" + str(d))
+        mesh = Mesh(d, d)
+        f_function = FFunction()
+        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
+        u_func = UFunction(u, vertices)
+        u_tilde_func = UTildeFunction()
+        e =  0#calc_l2_error(u_func,u_tilde_func)
+        ea = calc_l2_error_simplex_based(mesh, u_tilde_func, u)
+        errors[i] = e
+        errors_app[i] = ea
+        print("[Info] L2 error for M=" + str(d) + ": " + str(errors[i]))
+        print("[Info] Approx L2 error for M=" + str(d) + ": " + str(errors_app[i]))
+        i += 1
+    
+    plt.semilogy(h_tests,errors_app)
+    plt.title('Error of the discrete solution')
+    plt.grid(True)
+    plt.xticks(h_tests)
+    plt.xlabel('$M$')
+    plt.ylabel('$||e_h||_{L^2}$', rotation=0, labelpad=20)
+    plt.rcParams['xtick.labelsize']= 16
+    plt.rcParams['ytick.labelsize']= 16
+    plt.rcParams['font.size']= 15
+    plt.rcParams['figure.autolayout']= True
+    plt.rcParams['figure.figsize']= 7.2,4.45
+    plt.rcParams['axes.titlesize']= 16
+    plt.rcParams['axes.labelsize']= 17
+    plt.rcParams['lines.linewidth']= 2
+    plt.rcParams['lines.markersize']= 6
+    plt.rcParams['legend.fontsize']= 13
+    plt.rcParams['mathtext.fontset']= 'stix'
+    plt.rcParams['font.family']= 'STIXGeneral'
+    plt.savefig('helmholtz_error.eps', format='eps', dpi=1000)
+    plt.clf()
+    
+def visualize_Helmholtz():
+    #plotSolution(8, 'helmholtz_solution8')
+    #plotSolution(16, 'helmholtz_solution16',True)
+    plotSolution(32, 'helmholtz_solution32')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    if False:
+        fig = plt.figure(figsize=plt.figaspect(0.5))
+
+
+
+        mesh = Mesh(8, 8)
+        f_function = FFunction()
+        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
+        vertices = mesh.vertices
+        x = vertices[0, :]
+        y = vertices[1, :]
+
+        triangles = np.zeros((len(mesh.triangles), 3))
+
+        i = 0
+        for triangle in mesh.triangles:
+            triangles[i, :] = triangle.v
+            i += 1
+
+
+
+        ax = fig.add_subplot(1, 2, 1, projection='3d')
+        cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
+        plt.xlabel("x")
+        plt.ylabel("y")
+
+        plt.title(r'$u(x)$')
+        plt.rcParams['xtick.labelsize']= 16
+        plt.rcParams['ytick.labelsize']= 16
+        plt.rcParams['font.size']= 15
+        plt.rcParams['figure.autolayout']= True
+        plt.rcParams['figure.figsize']= 7.2,4.45
+        plt.rcParams['axes.titlesize']= 16
+        plt.rcParams['axes.labelsize']= 17
+        plt.rcParams['lines.linewidth']= 2
+        plt.rcParams['lines.markersize']= 6
+        plt.rcParams['legend.fontsize']= 13
+        plt.rcParams['mathtext.fontset']= 'stix'
+        plt.rcParams['font.family']= 'STIXGeneral'
+
+
+
+        mesh = Mesh(64, 64)
+        f_function = FFunction()
+        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
+        vertices = mesh.vertices
+        x = vertices[0, :]
+        y = vertices[1, :]
+
+        triangles = np.zeros((len(mesh.triangles), 3))
+
+        i = 0
+        for triangle in mesh.triangles:
+            triangles[i, :] = triangle.v
+            i += 1
+
+        ax = fig.add_subplot(1, 2, 2, projection='3d')
+        cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
+        #cbar = plt.colorbar(cs)
+        plt.xlabel("x")
+        plt.ylabel("y")
+
+        plt.title(r'$u(x)$')
+        plt.rcParams['xtick.labelsize']= 16
+        plt.rcParams['ytick.labelsize']= 16
+        plt.rcParams['font.size']= 15
+        plt.rcParams['figure.autolayout']= True
+        plt.rcParams['figure.figsize']= 7.2,4.45
+        plt.rcParams['axes.titlesize']= 16
+        plt.rcParams['axes.labelsize']= 17
+        plt.rcParams['lines.linewidth']= 2
+        plt.rcParams['lines.markersize']= 6
+        plt.rcParams['legend.fontsize']= 13
+        plt.rcParams['mathtext.fontset']= 'stix'
+        plt.rcParams['font.family']= 'STIXGeneral'
+
+        plt.savefig('helmholtz_further_examples.eps', format='eps', dpi=1000)
+        plt.clf()
+
+        plt.show()
+
+
+
+def plotSolution(meshsize,name,colormap = False):
+    mesh = Mesh(meshsize, meshsize)
+    f_function = FFunction()
+    vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
+    vertices = mesh.vertices
+    x = vertices[0, :]
+    y = vertices[1, :]
+
+    triangles = np.zeros((len(mesh.triangles), 3))
+
+    i = 0
+    for triangle in mesh.triangles:
+        triangles[i, :] = triangle.v
+        i += 1
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
+    if colormap:
+        cbar = plt.colorbar(cs)
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    plt.title(r'$u(x)$')
+    plt.rcParams['xtick.labelsize']= 16
+    plt.rcParams['ytick.labelsize']= 16
+    plt.rcParams['font.size']= 15
+    plt.rcParams['figure.autolayout']= True
+    plt.rcParams['figure.figsize']= 7.2,4.45
+    plt.rcParams['axes.titlesize']= 16
+    plt.rcParams['axes.labelsize']= 17
+    plt.rcParams['lines.linewidth']= 2
+    plt.rcParams['lines.markersize']= 6
+    plt.rcParams['legend.fontsize']= 13
+    plt.rcParams['mathtext.fontset']= 'stix'
+    plt.rcParams['font.family']= 'STIXGeneral'
+
+    plt.savefig(str(name)+'.eps', format='eps', dpi=1000)
+    plt.clf()
+    plt.show()
