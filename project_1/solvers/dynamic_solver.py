@@ -49,7 +49,7 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
                                                  epsrel=accuracy, args=(p1_ref, i, j))
                 else:
                     ans, err = gauss_legendre_reference(mass_matrix_integrant, args=(p1_ref, i, j))
-                M[tr_current.v[i], tr_current.v[j]] += atraf.get_determinant() * ans
+                M[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
 
     # Stiffness Matrix
     print("[Info] Calculating stiffness matrix")
@@ -65,7 +65,7 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
             for j in range(3):
                 # In order to make calculation feasible
                 co = (0.1, 0.1)
-                result = jinvt.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.dot(p1_ref.gradients(co)[:, j]))
+                result = jinvt.T.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.T.dot(p1_ref.gradients(co)[:, j]))
                 if quadpack:
                     ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1,
                                                  epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j, jinvt, result))
@@ -73,7 +73,7 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
                 else:
                     ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
                                                         args=(p1_ref, i, j, jinvt, result))
-                K[tr_current.v[i], tr_current.v[j]] += atraf.get_determinant() * ans
+                K[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
 
     # Leakage at (0,0)
     # K[0,:] *=0
@@ -87,16 +87,17 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
     nr = np.shape(vertices)[1]
 
     #for i in range(varnr):
-    #    if vertices[0, i] == 0:
+    #    if vertices[1, i] == 0:
     #        K[i, :] = np.zeros((1, nr))
     #        K[i, i] = 1
     #        b[i] = 0
 
     #for i in range(varnr):
-    #    if vertices[0, i] == 1:
-    #        K[i, :] = np.zeros((1, nr))
-    #        K[i, i] = 1
-    #        b[i] = 1
+    #    if vertices[1, i] == 1:
+    #        if vertices[0, i] > 0.3 and vertices[0, i] < 0.7:
+    #            K[i, :] = np.zeros((1, nr))
+    #            K[i, i] = 1
+    #            b[i] = 1
 
 
 
@@ -125,7 +126,8 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
 
         for i in range(varnr):
             if vertices[1, i] == 1:
-                y[i] = 1
+                if vertices[0, i] > 0.3 and vertices[0, i] < 0.7:
+                    y[i] = 1
         return y
 
     x, t_arr = solve_dynamic_system(system, (A,np.linalg.inv(M).dot(b)), timestep, t_end, u0,bc_imposer=bc_imposer,bc_args=(varnr,vertices))
@@ -168,4 +170,4 @@ def b_integrant_reference(y, x, p1_ref, i, f_function, j, v0_coord, det):
     xc = np.array([[x], [y]])
     x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
     x_new = j.dot(xc) + x0
-    return np.asscalar(p1_ref.value(co)[i] * f_function.value((x_new[0], x_new[1]))) * det
+    return np.asscalar(p1_ref.value(co)[i] * f_function.value((x_new[0], x_new[1]))) * np.abs(det)

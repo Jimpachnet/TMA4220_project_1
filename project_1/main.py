@@ -38,15 +38,15 @@ def main():
         mesh = Mesh(5, 5)
         mesh.draw()
     elif args.solve:
-        mesh = Mesh(25, 25)
+        mesh = Mesh(10, 25)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
         plot_triangulated_helmholtz(mesh, u)
     elif args.solvedynamic:
         mesh = Mesh(10, 10)
         u_ref = UTildeFunctionDynamic()
-        lnd = solve_dynamic(mesh, u_ref, 0.08, t_0=0, timestep=0.001)
-        plot_dynamic_2d_function_from_int(lnd, 0.08, mesh, t0=0, timestep=0.001, supports=100)
+        lnd = solve_dynamic(mesh, u_ref, 0.08, t_0=0, timestep=0.0001)
+        plot_dynamic_2d_function_from_int(lnd, 0.08, mesh, t0=0, timestep=0.0001, supports=100)
     elif args.wave:
         mesh = Mesh(25, 25)
         lnd = solve_wave_dynamic(mesh, 2, t_0=0, timestep=0.01)
@@ -54,9 +54,9 @@ def main():
     elif args.visualizedynamic:
         visualize_u_tilde_dynamic()
     elif args.reportplots:
-        visualize_nodal_basis()
+        vis_all()
     else:
-        h_tests = np.array([2, 3, 4, 8, 16, 32, 64, 128])
+        h_tests = np.array([2, 3, 4, 8, 16, 32, 64])
         errors = np.zeros_like(h_tests, dtype=float)
         errors_app = np.zeros_like(h_tests, dtype=float)
         i = 0
@@ -67,7 +67,7 @@ def main():
             vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
             u_func = UFunction(u, vertices)
             u_tilde_func = UTildeFunction()
-            e =  calc_l2_error(u_func,u_tilde_func)
+            e =  0#calc_l2_error(u_func,u_tilde_func)
             ea = calc_l2_error_simplex_based(mesh, u_tilde_func, u)
             errors[i] = e
             errors_app[i] = ea
