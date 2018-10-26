@@ -72,8 +72,6 @@ class Mesh:
         vertices = self.vertices
         triangles = self.triangles
 
-        patches = []
-
         colorticker = False
         fig, ax = plt.subplots()
 

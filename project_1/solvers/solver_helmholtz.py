@@ -10,6 +10,7 @@ import scipy.integrate as integrate
 from project_1.infrastructure.p1_reference_element import P1ReferenceElement
 from project_1.infrastructure.affine_transformation import AffineTransformation
 from project_1.utils.integration import gauss_legendre_reference
+from project_1.solvers.matrix_generation import generate_mass_matrix, generate_stiffness_matrix
 
 
 def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
@@ -30,49 +31,32 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
 
     # Mass matrix
     print("[Info] Calculating mass matrix")
-    M = np.zeros((varnr, varnr))
-
-    for n in range(len(mesh.triangles)):
-        tr_current = mesh.triangles[n]
-        v0_coord = (vertices[0, triangles[n].v0], vertices[1, triangles[n].v0])
-        v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
-        v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
-        atraf.set_target_cell(v0_coord, v1_coord, v2_coord)
-        for i in range(3):
-            for j in range(3):
-                if quadpack:
-                    ans, err = integrate.dblquad(mass_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy,
-                                                 epsrel=accuracy, args=(p1_ref, i, j))
-                else:
-                    ans, err = gauss_legendre_reference(mass_matrix_integrant, args=(p1_ref, i, j),supports=supports)
-                M[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
+    M = generate_mass_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices)
 
     # Stiffness Matrix
     print("[Info] Calculating stiffness matrix")
-    K = np.zeros((varnr, varnr))
-    for n in range(len(mesh.triangles)):
-        tr_current = mesh.triangles[n]
-        v0_coord = (vertices[0, triangles[n].v0], vertices[1, triangles[n].v0])
-        v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
-        v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
-        atraf.set_target_cell(v0_coord, v1_coord, v2_coord)
-        jinvt = atraf.get_inverse_jacobian().T
-        for i in range(3):
-            for j in range(3):
-                # In order to make calculation feasible
-                co = (0.1, 0.1)
-                result = jinvt.T.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.T.dot(p1_ref.gradients(co)[:, j]))
-                if quadpack:
-                    ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1,
-                                                 epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j, jinvt, result))
-                    # ans2, err2 = integrate.dblquad(stiffness_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt))
-                else:
-                    ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
-                                                        args=(p1_ref, i, j, jinvt, result),supports=supports)
-                K[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
+    K = generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices)
 
     # b
     print("[Info] Calculating linear form")
+    b = generate_linear_form(accuracy, atraf, f_function, mesh, p1_ref, quadpack, supports, triangles, varnr, vertices)
+
+    A = K + M
+
+    # BC Dirichlet
+    nr = np.shape(vertices)[1]
+    for i in range(nr):
+        if vertices[1, i] == 0 or vertices[1, i] == 1:
+            A[i, :] = np.zeros((1, nr))
+            A[i, i] = 1
+            b[i] = 0
+
+    # Solve system
+    u = np.linalg.inv(A).dot(b)
+    return vertices, u
+
+
+def generate_linear_form(accuracy, atraf, f_function, mesh, p1_ref, quadpack, supports, triangles, varnr, vertices):
     b = np.zeros((varnr, 1))
     for n in range(len(mesh.triangles)):
         tr_current = mesh.triangles[n]
@@ -95,22 +79,9 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
                                              args=(p1_ref, i, f_function, jinvt, v0_coord))
             else:
                 ans, err = gauss_legendre_reference(b_integrant_reference,
-                                                    args=(p1_ref, i, f_function, j, v0_coord, det),supports=supports)
+                                                    args=(p1_ref, i, f_function, j, v0_coord, det), supports=supports)
             b[tr_current.v[i]] += ans
-
-    A = K + M
-
-    # BC Dirichlet
-    nr = np.shape(vertices)[1]
-    for i in range(nr):
-        if vertices[1, i] == 0 or vertices[1, i] == 1:
-            A[i, :] = np.zeros((1, nr))
-            A[i, i] = 1
-            b[i] = 0
-
-    # Solve system
-    u = np.linalg.inv(A).dot(b)
-    return vertices, u
+    return b
 
 
 def mass_matrix_integrant(y, x, p1_ref, i, j):

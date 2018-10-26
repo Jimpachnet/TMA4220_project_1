@@ -437,8 +437,8 @@ def vis_all():
     #visualize_nodal_basis()
     #visualize_Gauss_Legendre_1d()
     #visualize_Gauss_Legendre_2d()
-    #visualize_Helmholtz()
-    visualizeMeshError()
+    visualize_Helmholtz()
+    #visualizeMeshError()
 
     #atraf = AffineTransformation()
     #atraf.set_target_cell((0, 0), (0, 1), (1, 0))
