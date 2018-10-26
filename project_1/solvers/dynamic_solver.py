@@ -81,7 +81,6 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
 
     b = np.zeros((varnr))
 
-    # Todo: Check BC implementation!
 
     # "Window" BC Dirichlet
     nr = np.shape(vertices)[1]
@@ -126,8 +125,8 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
 
         for i in range(varnr):
             if vertices[1, i] == 1:
-                if vertices[0, i] > 0.3 and vertices[0, i] < 0.7:
-                    y[i] = 1
+                #if vertices[0, i] > 0.3 and vertices[0, i] < 0.7:
+                y[i] = 1
         return y
 
     x, t_arr = solve_dynamic_system(system, (A,np.linalg.inv(M).dot(b)), timestep, t_end, u0,bc_imposer=bc_imposer,bc_args=(varnr,vertices))

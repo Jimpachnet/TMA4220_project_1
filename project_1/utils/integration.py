@@ -36,17 +36,24 @@ def gauss_legendre_reference(integrand, args,supports = 7):
         value += integrand(*argsp) * 9 / 80
     
         min = False
+        permutation = 0
         for i in range(6):
             if (min):
                 a = (6 - np.sqrt(15)) / 21
             else:
                 a = (6 + np.sqrt(15)) / 21
-            argsp = barycentric_to_cartesian_reference(a, a, 1 - 2 * a) + args
+            if(permutation<2):
+                argsp = barycentric_to_cartesian_reference(a, a, 1 - 2 * a) + args
+            elif permutation<4:
+                argsp = barycentric_to_cartesian_reference(a, 1 - 2 * a,a) + args
+            else:
+                argsp = barycentric_to_cartesian_reference(1 - 2 * a,a, a) + args
             if (min):
                 value += integrand(*argsp) * ((155 - np.sqrt(15)) / 2400)
             else:
                 value += integrand(*argsp) * ((155 + np.sqrt(15)) / 2400)
             min = not min
+            permutation+=1
         return value, 0
     elif supports == 4:
         value = 0

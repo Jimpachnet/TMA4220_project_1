@@ -186,6 +186,7 @@ def plot_dynamic_2d_function_from_int(lnd, t_end, mesh, t0=0, timestep=0.01, min
             plt.ylabel("y", labelpad=20)
             cbar.set_clim(minv, maxv)
             ax.set_zlim(minv, maxv)
+            ax.set_zlim(0, 1)
             plt.title(r'$u(x,t),\ t=$' + str(round(t_arr[t], 3)) + "s")
             ax.view_init(30, -70)
             plt.rcParams['xtick.labelsize'] = 16
@@ -200,6 +201,8 @@ def plot_dynamic_2d_function_from_int(lnd, t_end, mesh, t0=0, timestep=0.01, min
             plt.rcParams['legend.fontsize'] = 13
             plt.rcParams['mathtext.fontset'] = 'stix'
             plt.rcParams['font.family'] = 'STIXGeneral'
+            if t >=np.shape(t_arr)[0]-1:
+                plt.savefig('dynamic_last.eps', format='eps', dpi=1000)
             writer.grab_frame()
             plt.gcf().clear()
 
@@ -434,8 +437,8 @@ def vis_all():
     #visualize_nodal_basis()
     #visualize_Gauss_Legendre_1d()
     #visualize_Gauss_Legendre_2d()
-    visualize_Helmholtz()
-    #visualizeMeshError()
+    #visualize_Helmholtz()
+    visualizeMeshError()
 
     #atraf = AffineTransformation()
     #atraf.set_target_cell((0, 0), (0, 1), (1, 0))
@@ -497,19 +500,23 @@ def visualize_Gauss_Legendre_1d():
     plt.clf()
     
 def visualize_Gauss_Legendre_2d():
-    #true_value = 1.1654 MATLAB
+    #true_value = 1.1654 #MATLAB
     true_value=1.165417027 #Maple
+    #true_value = 1.165422 #Wolfram
     
-    def b_integrant_reference(y, x, p1_ref, i, j, v0_coord, det):
+    def b_integrant_reference(y, x, j, v0_coord, det):
         co = (x, y)
         xc = np.array([[x], [y]])
         x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
         x_new = j.dot(xc) + x0
-        return np.asscalar(p1_ref.value(co)[i] * np.log(x_new[0]+x_new[1])) * np.abs(det)
+        print("new")
+        print(x)
+        print(y)
+        return np.asscalar(np.log(x_new[0]+x_new[1])) * np.abs(det)
     
     p1_ref = P1ReferenceElement()
     atraf = AffineTransformation()
-    atraf.set_target_cell((1,0),(3,1),(3,2))
+    atraf.set_target_cell((1, 0), (3, 1), (3, 2))
     v0_coord = ((1,0))
     j = atraf.get_jacobian()
     det = atraf.get_determinant()
@@ -517,10 +524,11 @@ def visualize_Gauss_Legendre_2d():
     supps =np.array([1,3,4,7],dtype='int')
     vals = np.zeros_like(supps,dtype='float')
     for inter, value in np.ndenumerate(supps):
+        print("NEW SUBS")
+        print(value)
         totalint = 0
-        for i in range(3):
-            ans, err = gauss_legendre_reference(b_integrant_reference,args=(p1_ref, i, j, v0_coord, det),supports = value)
-            totalint +=ans
+        ans, err = gauss_legendre_reference(b_integrant_reference,args=(j, v0_coord, det),supports = value)
+        totalint +=ans
         vals[inter[0]] = totalint
 
     
@@ -548,7 +556,9 @@ def visualize_Gauss_Legendre_2d():
     plt.clf()
     
 def visualizeMeshError():
-    h_tests = np.array([2, 4, 8, 16, 32, 64])
+    #h_tests = np.array([2, 4, 8, 16, 32, 64])
+    h_tests = np.array([6, 11, 22, 44,88])
+    h_eq = np.array([4, 8, 16, 32,64])
     #h_tests = np.array([2, 3, 4, 8])
     errors = np.zeros_like(h_tests, dtype=float)
     errors_app = np.zeros_like(h_tests, dtype=float)
@@ -568,10 +578,10 @@ def visualizeMeshError():
         print("[Info] Approx L2 error for M=" + str(d) + ": " + str(errors_app[i]))
         i += 1
     
-    plt.semilogy(h_tests,errors_app)
+    plt.semilogy(h_eq,errors_app)
     plt.title('Error of the discrete solution')
     plt.grid(True)
-    plt.xticks(h_tests)
+    plt.xticks(h_eq)
     plt.xlabel('$M$')
     plt.ylabel('$||e_h||_{L^2}$', rotation=0, labelpad=20)
     plt.rcParams['xtick.labelsize']= 16
@@ -596,102 +606,6 @@ def visualize_Helmholtz():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    if False:
-        fig = plt.figure(figsize=plt.figaspect(0.5))
-
-
-
-        mesh = Mesh(8, 8)
-        f_function = FFunction()
-        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-        vertices = mesh.vertices
-        x = vertices[0, :]
-        y = vertices[1, :]
-
-        triangles = np.zeros((len(mesh.triangles), 3))
-
-        i = 0
-        for triangle in mesh.triangles:
-            triangles[i, :] = triangle.v
-            i += 1
-
-
-
-        ax = fig.add_subplot(1, 2, 1, projection='3d')
-        cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
-        plt.xlabel("x")
-        plt.ylabel("y")
-
-        plt.title(r'$u(x)$')
-        plt.rcParams['xtick.labelsize']= 16
-        plt.rcParams['ytick.labelsize']= 16
-        plt.rcParams['font.size']= 15
-        plt.rcParams['figure.autolayout']= True
-        plt.rcParams['figure.figsize']= 7.2,4.45
-        plt.rcParams['axes.titlesize']= 16
-        plt.rcParams['axes.labelsize']= 17
-        plt.rcParams['lines.linewidth']= 2
-        plt.rcParams['lines.markersize']= 6
-        plt.rcParams['legend.fontsize']= 13
-        plt.rcParams['mathtext.fontset']= 'stix'
-        plt.rcParams['font.family']= 'STIXGeneral'
-
-
-
-        mesh = Mesh(64, 64)
-        f_function = FFunction()
-        vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-        vertices = mesh.vertices
-        x = vertices[0, :]
-        y = vertices[1, :]
-
-        triangles = np.zeros((len(mesh.triangles), 3))
-
-        i = 0
-        for triangle in mesh.triangles:
-            triangles[i, :] = triangle.v
-            i += 1
-
-        ax = fig.add_subplot(1, 2, 2, projection='3d')
-        cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
-        #cbar = plt.colorbar(cs)
-        plt.xlabel("x")
-        plt.ylabel("y")
-
-        plt.title(r'$u(x)$')
-        plt.rcParams['xtick.labelsize']= 16
-        plt.rcParams['ytick.labelsize']= 16
-        plt.rcParams['font.size']= 15
-        plt.rcParams['figure.autolayout']= True
-        plt.rcParams['figure.figsize']= 7.2,4.45
-        plt.rcParams['axes.titlesize']= 16
-        plt.rcParams['axes.labelsize']= 17
-        plt.rcParams['lines.linewidth']= 2
-        plt.rcParams['lines.markersize']= 6
-        plt.rcParams['legend.fontsize']= 13
-        plt.rcParams['mathtext.fontset']= 'stix'
-        plt.rcParams['font.family']= 'STIXGeneral'
-
-        plt.savefig('helmholtz_further_examples.eps', format='eps', dpi=1000)
-        plt.clf()
-
-        plt.show()
-
-
-
 def plotSolution(meshsize,name,colormap = False):
     mesh = Mesh(meshsize, meshsize)
     f_function = FFunction()
@@ -713,6 +627,7 @@ def plotSolution(meshsize,name,colormap = False):
     if colormap:
         cbar = plt.colorbar(cs)
     plt.xlabel("x")
+    ax.set_zlim(-1, 1)
     plt.ylabel("y")
 
     plt.title(r'$u(x)$')

@@ -26,6 +26,7 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
     varnr = mesh.supportsy * mesh.supportsx
     atraf = AffineTransformation()
     p1_ref = P1ReferenceElement()
+    supports = 7
 
     # Mass matrix
     print("[Info] Calculating mass matrix")
@@ -43,7 +44,7 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
                     ans, err = integrate.dblquad(mass_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy,
                                                  epsrel=accuracy, args=(p1_ref, i, j))
                 else:
-                    ans, err = gauss_legendre_reference(mass_matrix_integrant, args=(p1_ref, i, j))
+                    ans, err = gauss_legendre_reference(mass_matrix_integrant, args=(p1_ref, i, j),supports=supports)
                 M[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
 
     # Stiffness Matrix
@@ -67,7 +68,7 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
                     # ans2, err2 = integrate.dblquad(stiffness_matrix_integrant, 0, 1, lambda x: 0, lambda x: 1, epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j,jinvt))
                 else:
                     ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
-                                                        args=(p1_ref, i, j, jinvt, result))
+                                                        args=(p1_ref, i, j, jinvt, result),supports=supports)
                 K[tr_current.v[i], tr_current.v[j]] += np.abs(atraf.get_determinant()) * ans
 
     # b
@@ -94,12 +95,10 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
                                              args=(p1_ref, i, f_function, jinvt, v0_coord))
             else:
                 ans, err = gauss_legendre_reference(b_integrant_reference,
-                                                    args=(p1_ref, i, f_function, j, v0_coord, det))
+                                                    args=(p1_ref, i, f_function, j, v0_coord, det),supports=supports)
             b[tr_current.v[i]] += ans
 
     A = K + M
-
-    # Todo:Check if BC are right
 
     # BC Dirichlet
     nr = np.shape(vertices)[1]
