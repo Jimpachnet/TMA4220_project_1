@@ -10,24 +10,15 @@ Additional requirements are listed in the setup.py and requirements.txt, namely
 * matplotlib
 * numpy
 * tqdm
-With ```pip``` these packages can be installed by using
-```$ pip install -r requirements.txt```
+
+With ```pip``` these packages can be installed by using ```$ pip install -r requirements.txt```. We recommend to create a new virtual environment using ```venv```. Afterwards, install the project using pip: ```$ pip install -e /path/to/parent/folder/of/setup.py```. Now, the main file of the project can be executed by navigating into ```project_1``` and executing ```$ python main.py```. 
 ## Execution
-The program is started by executing the main file located in the root. Without any arguments passed, the software will conduct an error analysis for the Helmholtz problem.
+The program is started by executing the main file located in the root. Without any arguments passed, the software will calculate and plot the solution to the Helmholtz problem.
 ### Arguments
-* -v Visualizes the analytical solution of the Helmholtz problem for debugging the basic functionality of the vis functions.
-* -vd Visualizes the analytical solution of the time dependant problem for debugging.
-* -m Generates and plots a triangular mesh for debugging.
-* -s Solves the Helmholtz problem and plots the solution
-* -sd Solves the dynamic problem and generates an animation of the solution
-* -w Solves the 2D wave equation and generates an animation 
-## State
-### Features
-* f(x) implemented
-* Analytical u(x) implemented
-* Visualization of the 2D functions
-* Simple unit tests for the functions
-### Todo
-* Find axis 3d inversion bug
-* Check if boundary conditions are implemented right
-* Intgrating for b - how to incorporate determinant
+* ```-v``` Visualizes the analytical solution of the Helmholtz problem for debugging the basic functionality of the vis functions.
+* ```-vd``` Visualizes the analytical solution of the time dependant problem for debugging.
+* ```-m``` Generates and plots a triangular mesh for debugging.
+* ```-s``` Solves the Helmholtz problem and plots the solution
+* ```-sd``` Solves the unsteady heat equation and generates an animation of the solution as well as a picture of the final frame. [Video of the solution](https://goo.gl/qCdw5e)
+* ```-w``` Solves the 2D wave equation and generates an animation 
+* ```-r``` Genaterates the required plots for the report, including the error analysis
