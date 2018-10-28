@@ -11,7 +11,8 @@ import scipy.integrate as integrate
 from project_1.infrastructure.affine_transformation import AffineTransformation
 from project_1.infrastructure.p1_reference_element import P1ReferenceElement
 from project_1.utils.integration import gauss_legendre_reference
-import project_1.infrastructure.mesh
+from project_1.infrastructure.mesh import Mesh
+from matplotlib.tri import Triangulation, LinearTriInterpolator
 
 
 def calc_l2_error(u_function, u_tilde_function):
@@ -39,38 +40,44 @@ def calc_l2_error_simplex_based(mesh, u_tilde_function, u):
     :return: The L2 error
     """
 
-    def error_integrant_reference(y, x, p1_ref, u_function, j, v0_coord, det, u_vals):
+    def error_integrant_reference(y, x, p1_ref, u_function, j, v0_coord, det, fz):
         co = (x, y)
         xc = np.array([[x], [y]])
         x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
         x_new = j.dot(xc) + x0
-        trival = 0
-        for i in range(3):
-            trival += p1_ref.value(co)[i] * u_vals[i]
+        trival =  fz(x_new[0],x_new[1])
         return np.asscalar(trival - u_function.value((x_new[0], x_new[1]))) ** 2
 
-    vertices = mesh.vertices
-    triangles = mesh.triangles
+
+
     atraf = AffineTransformation()
     p1_ref = P1ReferenceElement()
     error = 0
 
-    for n in range(len(mesh.triangles)):
-        tr_current = mesh.triangles[n]
+    m_ref = Mesh(88,88)
+    triangles = m_ref.triangles
+    trianglesarr = np.zeros((len(mesh.triangles), 3))
+
+    i = 0
+    for triangle in mesh.triangles:
+        trianglesarr[i, :] = triangle.v
+        i += 1
+
+
+
+
+    triObj = Triangulation(mesh.vertices[0,:], mesh.vertices[1,:],trianglesarr)
+    fz = LinearTriInterpolator(triObj, u[:,0])
+    vertices = m_ref.vertices
+    for n in range(len(m_ref.triangles)):
         v0_coord = (vertices[0, triangles[n].v0], vertices[1, triangles[n].v0])
         v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
         v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
         atraf.set_target_cell(v0_coord, v1_coord, v2_coord)
 
-        x_min = np.min([v0_coord[0], v1_coord[0], v2_coord[0]])
-        x_max = np.max([v0_coord[0], v1_coord[0], v2_coord[0]])
-        y_min = np.min([v0_coord[1], v1_coord[1], v2_coord[1]])
-        y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
-        jinvt = atraf.get_inverse_jacobian().T
         j = atraf.get_jacobian()
-        u_vals = (u[triangles[n].v0], u[triangles[n].v1], u[triangles[n].v2])
         det = atraf.get_determinant()
         ans, err = gauss_legendre_reference(error_integrant_reference,
-                                            args=(p1_ref, u_tilde_function, j, v0_coord, det, u_vals))
+                                            args=(p1_ref, u_tilde_function, j, v0_coord, det, fz))
         error += ans*np.abs(det)
     return np.sqrt(error)

@@ -580,13 +580,9 @@ def visualizeMeshError():
         mesh = Mesh(d, d)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-        u_func = UFunction(u, vertices)
         u_tilde_func = UTildeFunction()
-        e =  0#calc_l2_error(u_func,u_tilde_func)
         ea = calc_l2_error_simplex_based(mesh, u_tilde_func, u)
-        errors[i] = e
         errors_app[i] = ea
-        print("[Info] L2 error for M=" + str(d) + ": " + str(errors[i]))
         print("[Info] Approx L2 error for M=" + str(d) + ": " + str(errors_app[i]))
         i += 1
     
