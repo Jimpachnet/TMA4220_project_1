@@ -22,3 +22,5 @@ The program is started by executing the main file located in the root. Without a
 * ```-sd``` Solves the unsteady heat equation and generates an animation of the solution as well as a picture of the final frame. [Video of the solution](https://goo.gl/qCdw5e)
 * ```-w``` Solves the 2D wave equation and generates an animation 
 * ```-r``` Genaterates the required plots for the report, including the error analysis
+## Testing
+Several unittests are defined in ```project_1/tests/test.py```. The can be invoked by calling ```$ python test.py``` after navigating in the correct folder.
