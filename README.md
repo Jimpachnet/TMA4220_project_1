@@ -3,7 +3,7 @@ We present our solution to project 1 in the course TMA4220 at NTNU Trondheim in 
 The code impelements all required components to solve simple evolutionary and static PDEs in 2D on a triangular mesh. In particular, we implemented a solver for the Helmholtz problem and the homogenous unsteady heat equation. A third solver extends the dynamic solver to cope with the homogenous wave equoation in 2D.
 ![Solution to the Helmholtz problem](https://i.imgur.com/HrLQhM3.png)
 ## Installation
-The program is written in Python 3. The package is installed via the 
+The program is written in Python 3. The installation is shown via ```pip```.
 ### Requirements
 Additional requirements are listed in the setup.py and requirements.txt, namely
 * scipy
