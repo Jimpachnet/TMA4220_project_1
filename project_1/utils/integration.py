@@ -29,7 +29,6 @@ def gauss_legendre_reference(integrand, args,supports = 7):
     :param supports: Number of supports to evaluate
     :return: The evaluation of the integral
     """
-    # Todo Is different than in exercise!!!
     if supports == 7:
         value = 0
         argsp = barycentric_to_cartesian_reference(1 / 3, 1 / 3, 1 / 3) + args

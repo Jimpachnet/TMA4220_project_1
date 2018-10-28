@@ -141,6 +141,24 @@ class TestCode(unittest.TestCase):
         x2 = (3, 2)
         self.assertGreater(affine_trafo.get_determinant(x0, x1, x2), 0)
 
+        #Test inverse
+        j = affine_trafo.get_jacobian(x0, x1, x2)
+        j_inv = affine_trafo.get_inverse_jacobian(x0, x1, x2)
+        np.testing.assert_array_almost_equal(j_inv.dot(j),np.identity(2))
+
+        v0 = np.array([[1, 0]]).T
+        x = np.array([[1, 0]]).T
+        x_new = j_inv.dot(x-v0)
+        np.testing.assert_array_almost_equal(x_new,np.array([[0, 0]]).T)
+        x = np.array([[3, 1]]).T
+        x_new = j_inv.dot(x-v0)
+        np.testing.assert_array_almost_equal(x_new,np.array([[1, 0]]).T)
+        x = np.array([[3, 2]]).T
+        x_new = j_inv.dot(x-v0)
+        np.testing.assert_array_almost_equal(x_new,np.array([[0, 1]]).T)
+
+
+
 
 if __name__ == '__main__':
     print("Starting unittest...")
