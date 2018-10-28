@@ -10,8 +10,8 @@ Additional requirements are listed in the setup.py and requirements.txt, namely
 * matplotlib
 * numpy
 * tqdm
-With 'pip' these packages can be installed by using
-'$ pip install -r requirements.txt'
+With '''pip''' these packages can be installed by using
+'''$ pip install -r requirements.txt'''
 ## Execution
 The program is started by executing the main file located in the root. Without any arguments passed, the software will conduct an error analysis for the Helmholtz problem.
 ### Arguments
