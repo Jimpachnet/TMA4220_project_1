@@ -57,6 +57,20 @@ def solve_helmholtz(mesh, f_function, quadpack=False, accuracy=1.49e-05):
 
 
 def generate_linear_form(accuracy, atraf, f_function, mesh, p1_ref, quadpack, supports, triangles, varnr, vertices):
+    """
+    Generates the linear form of the Helmholtz problem
+    :param accuracy: The desired accuracy for the quadpack integration
+    :param atraf: The affine transformation to be used
+    :param f_function: The right hand side
+    :param mesh: The mesh to be used
+    :param p1_ref: The reference cell to be used
+    :param quadpack: If quadpack should be used
+    :param supports: Number of supports for the Gauss-Legendre integration
+    :param triangles: The triangle array
+    :param varnr: The number of nodes
+    :param vertices: The vertices array
+    :return: The linearform vector
+    """
     b = np.zeros((varnr, 1))
     for n in range(len(mesh.triangles)):
         tr_current = mesh.triangles[n]
@@ -84,23 +98,19 @@ def generate_linear_form(accuracy, atraf, f_function, mesh, p1_ref, quadpack, su
     return b
 
 
-def mass_matrix_integrant(y, x, p1_ref, i, j):
-    co = (x, y)
-    return p1_ref.value(co)[i] * p1_ref.value(co)[j]
-
-
-def stiffness_matrix_integrant_fast(y, x, p1_ref, i, j, jinvt, result):
-    if (x + y > 1):
-        result = 0
-    return result
-
-
-def stiffness_matrix_integrant(y, x, p1_ref, i, j, jinvt):
-    co = (x, y)
-    return jinvt.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.dot(p1_ref.gradients(co)[:, j]))
-
 
 def b_integrant(y, x, p1_ref, i, f_function, jinvt, v0_coord):
+    """
+    Integrant for the linear form
+    :param y: y position
+    :param x: x position
+    :param p1_ref: P1 reference element
+    :param i: Index of the basis function
+    :param f_function: Right hand side
+    :param jinvt: The inverse jacobian
+    :param v0_coord: The coordinates of v0
+    :return: The value of the integrant at that position
+    """
     co = (x, y)
     xp = np.array([x - v0_coord[0], y - v0_coord[1]])
     x_tr = (jinvt.dot(xp)[0], jinvt.dot(xp)[1])
@@ -109,6 +119,18 @@ def b_integrant(y, x, p1_ref, i, f_function, jinvt, v0_coord):
 
 
 def b_integrant_reference(y, x, p1_ref, i, f_function, j, v0_coord, det):
+    """
+    Integrant for the linear form
+    :param y: y position
+    :param x: x position
+    :param p1_ref: P1 reference element
+    :param i: Index of the basis function
+    :param f_function: Right hand side
+    :param j: Jacobian of the transformation
+    :param v0_coord: coordinate of v0
+    :param det: The determinant of j
+    :return: The value of the integrant at that position
+    """
     co = (x, y)
     xc = np.array([[x], [y]])
     x0 = np.array([[v0_coord[0]], [v0_coord[1]]])

@@ -347,6 +347,8 @@ def plot_triangulated_helmholtz(mesh, u):
     :param mesh: The mesh
     :param u: The solution
     """
+
+
     vertices = mesh.vertices
     x = vertices[0, :]
     y = vertices[1, :]
@@ -360,9 +362,10 @@ def plot_triangulated_helmholtz(mesh, u):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma)
+    cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma, vmax=1,vmin=-1)
     cbar = plt.colorbar(cs)
     plt.xlabel("x")
+    ax.set_zlim(-1, 1)
     plt.ylabel("y")
 
     plt.title(r'$u(x)$')
@@ -421,29 +424,20 @@ def visualize_nodal_basis_old():
     y = [0,1,0]
     z = [0,0,1]
     verts = [list(zip(x, y, z))]
-    print(verts)
     ax.add_collection3d(Poly3DCollection(verts), zs='z')
     plt.show()
-
-
 
 
 def vis_all():
     """
     Create plots for report
-    :return:
     """
 
-    #visualize_nodal_basis()
-    #visualize_Gauss_Legendre_1d()
-    #visualize_Gauss_Legendre_2d()
+    visualize_nodal_basis()
+    visualize_Gauss_Legendre_1d()
+    visualize_Gauss_Legendre_2d()
     visualize_Helmholtz()
-    #visualizeMeshError()
-
-    #atraf = AffineTransformation()
-    #atraf.set_target_cell((0, 0), (0, 1), (1, 0))
-    #print(atraf.get_determinant())
-
+    visualizeMeshError()
 
 def visualize_nodal_basis():
     fig = plt.figure()
@@ -509,9 +503,6 @@ def visualize_Gauss_Legendre_2d():
         xc = np.array([[x], [y]])
         x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
         x_new = j.dot(xc) + x0
-        print("new")
-        print(x)
-        print(y)
         return np.asscalar(np.log(x_new[0]+x_new[1])) * np.abs(det)
     
     p1_ref = P1ReferenceElement()
@@ -521,14 +512,25 @@ def visualize_Gauss_Legendre_2d():
     j = atraf.get_jacobian()
     det = atraf.get_determinant()
     
-    supps =np.array([1,3,4,7],dtype='int')
+    supps =np.array([1,3,4,7,14],dtype='int')
     vals = np.zeros_like(supps,dtype='float')
     for inter, value in np.ndenumerate(supps):
-        print("NEW SUBS")
-        print(value)
-        totalint = 0
-        ans, err = gauss_legendre_reference(b_integrant_reference,args=(j, v0_coord, det),supports = value)
-        totalint +=ans
+        if value == 14:
+            totalint = 0
+            atraf.set_target_cell((1, 0), (3, 1), (2, 1))
+            v0_coord = ((1, 0))
+            j = atraf.get_jacobian()
+            det = atraf.get_determinant()
+            ans, err = gauss_legendre_reference(b_integrant_reference, args=(j, v0_coord, det), supports=7)
+            totalint += ans
+            atraf.set_target_cell((3, 1), (3, 2), (2, 1))
+            v0_coord = ((3, 1))
+            j = atraf.get_jacobian()
+            det = atraf.get_determinant()
+            ans, err = gauss_legendre_reference(b_integrant_reference, args=(j, v0_coord, det), supports=7)
+            totalint += ans
+        else:
+            totalint, err = gauss_legendre_reference(b_integrant_reference,args=(j, v0_coord, det),supports = value)
         vals[inter[0]] = totalint
 
     
@@ -556,10 +558,11 @@ def visualize_Gauss_Legendre_2d():
     plt.clf()
     
 def visualizeMeshError():
-    #h_tests = np.array([2, 4, 8, 16, 32, 64])
+    """
+    Visualizes the error made by using different mesh sizes
+    """
     h_tests = np.array([6, 11, 22, 44,88])
     h_eq = np.array([4, 8, 16, 32,64])
-    #h_tests = np.array([2, 3, 4, 8])
     errors = np.zeros_like(h_tests, dtype=float)
     errors_app = np.zeros_like(h_tests, dtype=float)
     i = 0
@@ -583,7 +586,7 @@ def visualizeMeshError():
     plt.grid(True)
     plt.xticks(h_eq)
     plt.xlabel('$M$')
-    plt.ylabel('$||e_h||_{L^2}$', rotation=0, labelpad=20)
+    plt.ylabel('$||e_h||_{L^2}$', rotation=0, labelpad=14)
     plt.rcParams['xtick.labelsize']= 16
     plt.rcParams['ytick.labelsize']= 16
     plt.rcParams['font.size']= 15
@@ -600,13 +603,23 @@ def visualizeMeshError():
     plt.clf()
     
 def visualize_Helmholtz():
-    #plotSolution(8, 'helmholtz_solution8')
-    #plotSolution(16, 'helmholtz_solution16',True)
+    """
+    Visualizes the solution of the Helmholtz problem for different mesh sizes
+    :return:
+    """
+    plotSolution(8, 'helmholtz_solution8')
+    plotSolution(16, 'helmholtz_solution16',True)
     plotSolution(32, 'helmholtz_solution32')
 
 
 
 def plotSolution(meshsize,name,colormap = False):
+    """
+    Visualizes the solution of the Helmholtz problem
+    :param meshsize: The size of the mesh
+    :param name: The name which should be used to save the solution
+    :param colormap: Should a colormap be plotted
+    """
     mesh = Mesh(meshsize, meshsize)
     f_function = FFunction()
     vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)

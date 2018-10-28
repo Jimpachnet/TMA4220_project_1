@@ -19,7 +19,6 @@ class AffineTransformation:
         :param v0: Tuple (x,y) of the location of vertex v0
         :param v1: Tuple (x,y) of the location of vertex v1
         :param v2: Tuple (x,y) of the location of vertex v1
-        :return:
         """
 
         self.v0 = v0

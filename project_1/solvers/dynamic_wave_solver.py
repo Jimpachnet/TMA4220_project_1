@@ -42,10 +42,6 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     K = generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices)
     K*=c**2
 
-    # Leakage at (0,0)
-    # K[0,:] *=0
-    # K[0,0] = 1
-
     b = np.zeros((varnr, 1))
 
     A = -np.linalg.inv(M).dot(K)
@@ -61,18 +57,8 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     print("[Info] Solving system in time domain")
 
     u0 = np.ones_like(u[:, 0]) * 0
-    #for i in range(varnr):
-    #    if vertices[0, i] == 1 or vertices[0, i] == 0 or vertices[1, i] == 1 or vertices[1, i] == 0:
-    #        u0[i] = 0
-    #    elif (vertices[0, i] - 0.5) ** 2 <= 0.0002 ** 2 and (vertices[1, i] - 0.5) ** 2 <= 0.0002 ** 2:
-    #        u0[i] = 1 - ((vertices[0, i] - 0.5) ** 2 + (vertices[1, i] - 0.5) ** 2) ** (0.5)
 
     v0 = np.ones_like(u[:, 0]) * 0
-
-    # Non homogenous initial condition
-    # u0 = u[:,0]
-    # for i in range(varnr):
-    #    u0[i] = reference_function.value(vertices[:,i],0)
 
     x0 = np.zeros((2 * varnr))
 
@@ -94,9 +80,6 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
     def bc_imposer(y,t,args):
         varnr = args[0]
         vertices = args[1]
-        #for i in range(varnr):
-        #    if vertices[1, i] == 0:
-        #        y[i] = 0
 
         for i in range(varnr):
             if vertices[1, i] == 1:
@@ -121,7 +104,6 @@ def solve_wave_dynamic(mesh, t_end, t_0=0, timestep=0.01, quadpack=False, accura
 
     x, t_arr = solve_dynamic_system(system, (J,bm), timestep, t_end, x0,bc_imposer=bc_imposer,bc_args=(varnr,vertices))
 
-    # Todo: Beautify
     print("[Info] Generating interpolator")
     u = x[0:varnr]
     t_arr = np.squeeze(t_arr)

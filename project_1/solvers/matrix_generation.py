@@ -7,6 +7,18 @@ import scipy.integrate as integrate
 from project_1.utils.integration import gauss_legendre_reference
 
 def generate_mass_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices):
+    """
+    Generates the mass matrix
+    :param accuracy: The desired accuracy of the integration if quadpack is used
+    :param atraf: The affine transformation object
+    :param mesh: The mesh
+    :param p1_ref: The reference element
+    :param quadpack: should the quadpack integrator be used
+    :param triangles: The triangle array
+    :param varnr: The number of nodes
+    :param vertices: The vertices array
+    :return: The mass matrix
+    """
     M = np.zeros((varnr, varnr))
     for n in range(len(mesh.triangles)):
         tr_current = mesh.triangles[n]
@@ -26,6 +38,18 @@ def generate_mass_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, var
 
 
 def generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices):
+    """
+    Generates the stiffness matrix
+    :param accuracy: The desired accuracy of the integration if quadpack is used
+    :param atraf: The affine transformation object
+    :param mesh: The mesh
+    :param p1_ref: The reference element
+    :param quadpack: should the quadpack integrator be used
+    :param triangles: The triangle array
+    :param varnr: The number of nodes
+    :param vertices: The vertices array
+    :return: The stiffness matrix
+    """
     K = np.zeros((varnr, varnr))
     for n in range(len(mesh.triangles)):
         tr_current = mesh.triangles[n]
@@ -49,6 +73,15 @@ def generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles
     return K
 
 def mass_matrix_integrant(y, x, p1_ref, i, j):
+    """
+    Integrant of the mass matrix
+    :param y: Position in y
+    :param x: Position in x
+    :param p1_ref: P1 reference element
+    :param i: Index of the first basis
+    :param j: Index of the second basis
+    :return: The value of the integrant
+    """
     co = (x, y)
     return p1_ref.value(co)[i] * p1_ref.value(co)[j]
 

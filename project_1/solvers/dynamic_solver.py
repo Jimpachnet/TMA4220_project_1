@@ -71,7 +71,6 @@ def solve_dynamic(mesh, reference_function, t_end, t_0=0, timestep=0.01, quadpac
 
     x, t_arr = solve_dynamic_system(system, (A,np.linalg.inv(M).dot(b)), timestep, t_end, u0,bc_imposer=bc_imposer,bc_args=(varnr,vertices))
 
-    # Todo: Beautify
     print("[Info] Generating interpolator")
     t_arr = np.squeeze(t_arr)
 

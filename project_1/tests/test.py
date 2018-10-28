@@ -15,7 +15,6 @@ from project_1.infrastructure.affine_transformation import AffineTransformation
 class TestCode(unittest.TestCase):
     """
     Useful test cases
-    Todo:Add more test cases
     """
 
     def setUp(self):

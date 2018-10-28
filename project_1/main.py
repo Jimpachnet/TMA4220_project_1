@@ -21,6 +21,9 @@ from project_1.functions.u_function_dynamic import UFunctionDynamic
 
 
 def main():
+    """
+    The main functionality of the project
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', "--visualize", help="Plot the initial visualization", action='store_true')
     parser.add_argument('-vd', "--visualizedynamic", help="Plot the initial visualization", action='store_true')
@@ -33,17 +36,16 @@ def main():
 
     if args.visualize:
         visualize_u_tilde()
-
     elif args.mesh:
         mesh = Mesh(5, 5)
         mesh.draw()
     elif args.solve:
-        mesh = Mesh(10, 25)
+        mesh = Mesh(32, 32)
         f_function = FFunction()
         vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
         plot_triangulated_helmholtz(mesh, u)
     elif args.solvedynamic:
-        mesh = Mesh(10, 10)
+        mesh = Mesh(32, 32)
         u_ref = UTildeFunctionDynamic()
         lnd = solve_dynamic(mesh, u_ref, 0.11, t_0=0, timestep=0.0001)
         plot_dynamic_2d_function_from_int(lnd, 0.11, mesh, t0=0, timestep=0.01, supports=100)
@@ -56,21 +58,10 @@ def main():
     elif args.reportplots:
         vis_all()
     else:
-        h_tests = np.array([2, 3, 4, 8, 16, 32, 64])
-        errors = np.zeros_like(h_tests, dtype=float)
-        errors_app = np.zeros_like(h_tests, dtype=float)
-        i = 0
-        for d in np.nditer(h_tests):
-            print("[Info] M=" + str(d))
-            mesh = Mesh(d, d)
-            f_function = FFunction()
-            vertices, u = solve_helmholtz(mesh, f_function, accuracy=1.49e-1)
-            u_tilde_func = UTildeFunction()
-            ea = calc_l2_error_simplex_based(mesh, u_tilde_func, u)
-            errors_app[i] = ea
-            print("[Info] Approx L2 error for M=" + str(d) + ": " + str(errors_app[i]))
-            i += 1
-        plot_error(h_tests, errors, errors_app)
+        mesh = Mesh(32, 32)
+        f_function = FFunction()
+        vertices, u = solve_helmholtz(mesh, f_function)
+        plot_triangulated_helmholtz(mesh, u)
 
 
 if __name__ == "__main__":
