@@ -56,25 +56,28 @@ class TestCode(unittest.TestCase):
         self.assertAlmostEqual(u_tilde_test_instance.value(x), 1)
 
         # Evaluate correctness of solution regarding f
-        x = (0.3, 0.2)
-        self.assertAlmostEqual(evaluate_lhs(x, u_tilde_test_instance) - f_test_instance.value(x), 0)
+        n = 100
+        x = np.linspace(0, 1, n)
+        y = np.linspace(0, 1, n)
+        xv, yv = np.meshgrid(x, y)
+        xv = xv.reshape(n ** 2)
+        yv = yv.reshape(n ** 2)
+        for i in range(n**2):
+            self.assertAlmostEqual(evaluate_lhs((xv[i],yv[i]), u_tilde_test_instance) - f_test_instance.value((xv[i],yv[i])), 0)
+
 
         # Evaluate compliance with boundary conditions
-
         # Dirichlet
-        x = (0.5, 0)
-        self.assertAlmostEqual(u_tilde_test_instance.value(x), 0)
-        x = (0.5, 1)
-        self.assertAlmostEqual(u_tilde_test_instance.value(x), 0)
+        bd = np.arange(0,1,0.01)
+        for i in    np.nditer(bd):
+            self.assertAlmostEqual(u_tilde_test_instance.value((i,0)), 0)
+            self.assertAlmostEqual(u_tilde_test_instance.value((i, 1)), 0)
 
         # Neumann
-        x = (0, 0.5)
         n = np.array([[-1, 0]]).T
-        self.assertAlmostEqual(np.asscalar(u_tilde_test_instance.gradient(x).T.dot(n)), 0)
-
-        x = (1, 0.2)
-        n = np.array([[1, 0]]).T
-        self.assertAlmostEqual(np.asscalar(u_tilde_test_instance.gradient(x).T.dot(n)), 0)
+        for i in    np.nditer(bd):
+            self.assertAlmostEqual(np.asscalar(u_tilde_test_instance.gradient((0,i)).T.dot(n)), 0)
+            self.assertAlmostEqual(np.asscalar(u_tilde_test_instance.gradient((1, i)).T.dot(n)), 0)
 
     def test_p1_reference_element(self):
         """
@@ -103,9 +106,16 @@ class TestCode(unittest.TestCase):
         self.assertEqual(v[2], 1)
 
         # Check sum properties
-        x = (0.3, 0.5)
-        v = p1_reference_element.value(x)
-        self.assertEqual(np.sum(v), 1)
+        n = 100
+        x = np.linspace(0, 1, n)
+        y = np.linspace(0, 1, n)
+        xv, yv = np.meshgrid(x, y)
+        xv = xv.reshape(n ** 2)
+        yv = yv.reshape(n ** 2)
+        for i in range(n**2):
+            if(xv[i]+yv[i]<=1):
+                self.assertAlmostEqual(np.sum(p1_reference_element.value((xv[i],yv[i]))),1)
+
 
     def test_affine_transformation(self):
         """

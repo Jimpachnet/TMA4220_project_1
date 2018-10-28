@@ -7,6 +7,7 @@ Main file of the project.
 import argparse
 import numpy as np
 
+
 from project_1.functions.u_tilde_function import UTildeFunction
 from project_1.functions.u_function_tilde_dynamic import UTildeFunctionDynamic
 from project_1.utils.visual_tools import *
