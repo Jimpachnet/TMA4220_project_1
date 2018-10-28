@@ -440,6 +440,9 @@ def vis_all():
     visualizeMeshError()
 
 def visualize_nodal_basis():
+    """
+    Visualize a prototype of a nodal basis
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
@@ -461,6 +464,9 @@ def visualize_nodal_basis():
     plt.show()
 
 def visualize_Gauss_Legendre_1d():
+    """
+    Visualize the Gauss_legendre error on R1
+    """
 
     vals = np.zeros(4)
 
@@ -494,6 +500,9 @@ def visualize_Gauss_Legendre_1d():
     plt.clf()
     
 def visualize_Gauss_Legendre_2d():
+    """
+    Visualize the Gauss_legendre error on R2
+    """
     #true_value = 1.1654 #MATLAB
     true_value=1.165417027 #Maple
     #true_value = 1.165422 #Wolfram

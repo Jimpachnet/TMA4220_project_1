@@ -158,8 +158,6 @@ class TestCode(unittest.TestCase):
         np.testing.assert_array_almost_equal(x_new,np.array([[0, 1]]).T)
 
 
-
-
 if __name__ == '__main__':
     print("Starting unittest...")
     unittest.main()
