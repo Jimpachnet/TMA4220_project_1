@@ -14,6 +14,7 @@ from project_1.utils.visual_tools import *
 from project_1.infrastructure.mesh import Mesh
 from project_1.functions.f_function import FFunction
 from project_1.solvers.solver_helmholtz import solve_helmholtz
+from project_1.solvers.solver_forces import solve_forces
 from project_1.functions.u_function import UFunction
 from project_1.utils.error_analysis import calc_l2_error, calc_l2_error_simplex_based
 from project_1.solvers.dynamic_solver import solve_dynamic
@@ -59,10 +60,9 @@ def main():
     elif args.reportplots:
         vis_all()
     else:
-        mesh = Mesh(32, 32)
-        f_function = FFunction()
-        vertices, u = solve_helmholtz(mesh, f_function)
-        plot_triangulated_helmholtz(mesh, u)
+        mesh = Mesh(15, 15)
+        vertices, u = solve_forces(mesh)
+        plot_triangulated_strain(mesh, u)
 
 
 if __name__ == "__main__":

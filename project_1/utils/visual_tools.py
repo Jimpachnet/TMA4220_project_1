@@ -372,6 +372,36 @@ def plot_triangulated_helmholtz(mesh, u):
     plt.show()
 
 
+def plot_triangulated_strain(mesh, u):
+    """
+    Plots the triangulated solution
+    :param mesh: The mesh
+    :param u: The solution
+    """
+
+
+    vertices = mesh.vertices
+    x = vertices[0, :]
+    y = vertices[1, :]
+
+    triangles = np.zeros((len(mesh.triangles), 3))
+
+    i = 0
+    for triangle in mesh.triangles:
+        triangles[i, :] = triangle.v
+        i += 1
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    cs = ax.plot_trisurf(x, y, np.squeeze(u), cmap=cm.plasma)
+    cbar = plt.colorbar(cs)
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    plt.title(r'$u(x)$')
+    plt.show()
+
+
 def plot_error(trials, errors, errors_app):
     """
     Plot error over different mesh sizes
