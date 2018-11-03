@@ -17,7 +17,7 @@ class Mesh:
     Represents a mesh
     """
 
-    def __init__(self, sx, sy, h=1, w=1):
+    def __init__(self, sx, sy, h=2, w=2):
         """
         Initialize the mesh
         :param sx: Number of support points in x
@@ -27,7 +27,7 @@ class Mesh:
         """
         self.generate_mesh(sx, sy, h, w)
 
-    def generate_mesh(self, supportsx, supportsy, height=1, width=1):
+    def generate_mesh(self, supportsx, supportsy, height=2, width=2, x0 = -1, y0 = -1):
         """
         Generates a simplex mesh in 2D on a rectangle
         :param supportsx: Number of support points in x
@@ -47,7 +47,7 @@ class Mesh:
 
         for y in range(supportsy):
             for x in range(supportsx):
-                vertices[:, id] = np.array([x * h_x, y * h_y])
+                vertices[:, id] = np.array([x * h_x+x0, y * h_y+y0])
                 if y < supportsy - 1:
                     if x > 0:
                         t_upper = Triangle(id + supportsx, id + supportsx - 1, id, tri_id)

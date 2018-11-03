@@ -60,9 +60,10 @@ def main():
     elif args.reportplots:
         vis_all()
     else:
-        mesh = Mesh(15, 15)
+        mesh = Mesh(5, 5)
         vertices, u = solve_forces(mesh)
-        plot_triangulated_strain(mesh, u)
+        print(np.max(u))
+        plot_triangulated_strain(mesh, u[1::2])
 
 
 if __name__ == "__main__":

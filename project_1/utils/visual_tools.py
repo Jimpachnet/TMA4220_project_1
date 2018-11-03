@@ -401,6 +401,14 @@ def plot_triangulated_strain(mesh, u):
     plt.title(r'$u(x)$')
     plt.show()
 
+    cs = plt.tricontour(x, y, np.squeeze(u), cmap=cm.plasma)
+    cbar = plt.colorbar(cs)
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.title(r'$u(x)$')
+    plt.show()
+
+
 
 def plot_error(trials, errors, errors_app):
     """
