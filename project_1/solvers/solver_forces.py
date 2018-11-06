@@ -4,6 +4,9 @@
 
 import numpy as np
 import scipy.integrate as integrate
+import matplotlib.pyplot as plt
+from scipy.sparse import lil_matrix
+
 
 from project_1.infrastructure.p1_reference_element import P1ReferenceElement
 from project_1.infrastructure.affine_transformation import AffineTransformation
@@ -22,13 +25,18 @@ def solve_forces(mesh, quadpack=False, accuracy=1.49e-05):
     print("[Info] Calculating stiffness matrix")
     K = generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices)
 
+    plt.imshow(K, interpolation='nearest', cmap=plt.cm.ocean,
+               extent=(0.5, np.shape(K)[0] + 0.5, 0.5, np.shape(K)[1] + 0.5))
+    plt.colorbar()
+    plt.show()
+
+
     print("[Info] Calculating linear form")
     b = generate_linear_form_new(accuracy, atraf, mesh, p1_ref, quadpack, supports, triangles, varnr, vertices)
 
-
+    print(K)
     print(b)
 
-    print(K)
     A = K
     # BC Dirichlet
     nr = np.shape(vertices)[1]
@@ -43,6 +51,10 @@ def solve_forces(mesh, quadpack=False, accuracy=1.49e-05):
 
     # Solve system
     u = np.linalg.inv(A).dot(b)
+
+
+
+
     return vertices, u
 
 
@@ -82,6 +94,19 @@ def solve_forces_old(mesh, quadpack=False, accuracy=1.49e-05):
 
     # Solve system
     u = np.linalg.inv(A).dot(b)
+
+
+
+    plt.imshow(K-K.T, interpolation='nearest', cmap=plt.cm.ocean,
+               extent=(0.5, np.shape(A)[0] + 0.5, 0.5, np.shape(K-K.T)[1] + 0.5))
+    plt.colorbar()
+    plt.show()
+
+    plt.imshow(K, interpolation='nearest', cmap=plt.cm.ocean,
+               extent=(0.5, np.shape(A)[0] + 0.5, 0.5, np.shape(K)[1] + 0.5))
+    plt.colorbar()
+    plt.show()
+
     return vertices, u
 
 
@@ -120,21 +145,17 @@ def generate_linear_form_new(accuracy, atraf, mesh, p1_ref, quadpack, supports, 
         v1_coord = (vertices[0, triangles[n].v1], vertices[1, triangles[n].v1])
         v2_coord = (vertices[0, triangles[n].v2], vertices[1, triangles[n].v2])
         atraf.set_target_cell(v0_coord, v1_coord, v2_coord)
-
-        x_min = np.min([v0_coord[0], v1_coord[0], v2_coord[0]])
-        x_max = np.max([v0_coord[0], v1_coord[0], v2_coord[0]])
-        y_min = np.min([v0_coord[1], v1_coord[1], v2_coord[1]])
-        y_max = np.max([v0_coord[1], v1_coord[1], v2_coord[1]])
-        jinvt = atraf.get_inverse_jacobian().T
         j = atraf.get_jacobian()
         det = atraf.get_determinant()
         for i in range(3):
             ans, err = gauss_legendre_reference(b_integrant_reference_1,
                                                     args=(p1_ref, i, j, v0_coord, det), supports=supports)
             b[tr_current.v[i]*2] += ans
+            a1 = ans
             ans, err = gauss_legendre_reference(b_integrant_reference_2,
                                                 args=(p1_ref, i, j, v0_coord, det), supports=supports)
             b[tr_current.v[i]*2+1] += ans
+
     return b
 
 
@@ -153,12 +174,13 @@ def b_integrant_reference_1(y, x, p1_ref, i, j, v0_coord, det):
     x0 = np.array([[v0_coord[0]], [v0_coord[1]]])
     x_new = j.dot(xc) + x0
     return np.asscalar(p1_ref.value(co)[i] * f_function(x_new[0], x_new[1])) * np.abs(det)
+
 def b_integrant_reference_2(y, x, p1_ref, i, j, v0_coord, det):
 
-    def f_function(y,x):
+    def f_function(x,y):
         Youngs_E_Modulus = 250 * 10 ^ 9
         v = 0.3
-        fx = Youngs_E_Modulus/(1-v**2)*(-2*y**2-x**2+v*x**2-2*v*x*y-2*x*y+3-v)
+        fx = Youngs_E_Modulus/(1-v**2)*(-2*x**2-y**2+v*y**2-2*v*x*y-2*x*y+3-v)
         return fx
 
     co = (x, y)
@@ -276,6 +298,11 @@ def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, trian
 
         D_0 = np.array([[1, v, 0], [v, 1, 0], [0, 0, (1 - v) / 2]])
         D = Youngs_E_Modulus / (1 - v ** 2) * D_0
+
+        #D_0_2 = np.array([[1, v/(1-v), 0], [v/(1-v), 1, 0], [0, 0, (1 - 2*v) / 2*(1-v)]])
+
+        #D = Youngs_E_Modulus*(1-v)/((1+v)*(1-2*v))*D_0_2
+
         local_K = np.zeros((6,6))
         for i in range(6):
             for j in range(6):
@@ -291,13 +318,15 @@ def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, trian
                 else:
                     B_i[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]
                     B_i[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]
-
                 if j % 2 == 0:
                     B_j[0,:] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]
                     B_j[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
                 else:
                     B_j[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
                     B_j[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]
+
+                #print("j:"+str(j))
+                #print(j//2)
 
                 result = np.asscalar(B_i.T.dot(D).dot(B_j))
 
@@ -310,16 +339,20 @@ def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, trian
                     ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1,
                                                  epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j, jinvt, result))
                 else:
-                    ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
-                                                        args=(p1_ref, i, j, jinvt, result))
+                    #ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
+                    #                                    args=(p1_ref, i, j, jinvt, result))
+                    ans = result/2
 
                 local_K[i,j] = np.abs(atraf.get_determinant()) * ans
 
 
+        if ~np.isclose(np.linalg.det(local_K),0):
+            print("ERROR")
+
         for i in range(3):
             for j in range(3):
                 K[tr_current.v[i]*2, tr_current.v[j]*2] += local_K[i*2,j*2]
-                K[tr_current.v[i] * 2+1, tr_current.v[j] * 2+1] += local_K[i * 2+1, j * 2+1]
+                K[tr_current.v[i] * 2 + 1, tr_current.v[j] * 2 + 1] += local_K[i * 2+1, j * 2+1]
 
 
 
