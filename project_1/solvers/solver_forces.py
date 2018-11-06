@@ -237,11 +237,6 @@ def generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles
                 # In order to make calculation feasible
                 co = (0.1, 0.1)
                 result = jinvt.T.dot(p1_ref.gradients(co)[:, i]).T.dot(jinvt.T.dot(p1_ref.gradients(co)[:, j]))
-
-
-
-
-                #START
                 Youngs_E_Modulus = 250 * 10 ^ 9
                 v = 0.3
 
@@ -249,25 +244,15 @@ def generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles
                 K_ = Youngs_E_Modulus / (3 * (1 - 2 * v))
                 mue = 3 * (K_ - Youngs_E_Modulus) / 2
 
-
-
-                D_0 = np.array([[1,v,0],[v,1,0],[0,0,(1-v)/2]])
-                D = Youngs_E_Modulus/(1-v**2)*D_0
-
-
+                D = Youngs_E_Modulus/(1-v**2)*np.array([[1,v,0],[v,1,0],[0,0,(1-v)/2]])
                 B = np.zeros((3,1))
                 B[0:2,:] = jinvt.T.dot(p1_ref.gradients(co)[:, i])
                 B[2,0] = np.sum(jinvt.T.dot(p1_ref.gradients(co)[:, i]))
-
                 Bt = np.zeros((3, 1))
                 Bt[0:2,:] = jinvt.T.dot(p1_ref.gradients(co)[:, j])
                 Bt[2,0] = np.sum(jinvt.T.dot(p1_ref.gradients(co)[:, j]))
 
                 result = np.asscalar(B.T.dot(D).dot(Bt))
-
-
-                #END
-
 
 
                 if quadpack:
@@ -283,6 +268,17 @@ def generate_stiffness_matrix(accuracy, atraf, mesh, p1_ref, quadpack, triangles
 
 
 def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, triangles, varnr, vertices):
+    def C_tensor(eps):
+        Youngs_E_Modulus = 250 * 10 ^ 9
+        v = 0.3
+
+        fktr = 2
+
+        dxx = eps[0, 0]
+        dyy = eps[1, 1]
+        dxz = eps[0, 1]
+
+        return np.array([[dxx + v * dyy, (1 - v) / fktr * dxz], [(1 - v) / fktr * dxz, dyy + v * dxx]])
     K = np.zeros((varnr*2, varnr*2))
     for n in range(len(mesh.triangles)):
         tr_current = mesh.triangles[n]
@@ -303,6 +299,11 @@ def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, trian
 
         #D = Youngs_E_Modulus*(1-v)/((1+v)*(1-2*v))*D_0_2
 
+
+
+
+
+
         local_K = np.zeros((6,6))
         for i in range(6):
             for j in range(6):
@@ -312,38 +313,61 @@ def generate_stiffness_matrix_new(accuracy, atraf, mesh, p1_ref, quadpack, trian
                 B_i= np.zeros((3, 1))
                 B_j = np.zeros((3, 1))
 
-                if i % 2 == 0:
-                    B_i[0,:] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]
-                    B_i[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]
-                else:
-                    B_i[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]
-                    B_i[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]
-                if j % 2 == 0:
-                    B_j[0,:] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]
-                    B_j[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
-                else:
-                    B_j[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
-                    B_j[2, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]
+                #if i % 2 == 0:
+                #    B_i[0,:] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]
+                #
+                #    B_i[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i // 2])[1]
+#
+ #                   B_i[2, :] = 0.5*jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]+0.5*jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]
+  #              else:
+   #                 B_i[0, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i // 2])[0]
+#
+ #                   B_i[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]
+  #                  B_i[2, :] = 0.5*jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]+0.5*jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]
+   #             if j % 2 == 0:
+    ##
+      #              B_j[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j // 2])[1]
+#
+ #                   B_j[2, :] = 0.5*jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]+0.5*jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]
+  #              else:
+   #                 B_j[0, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j // 2])[0]
+#
+ #                   B_j[1, :] = jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
+  #                  B_j[2, :] = 0.5*jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]+0.5*jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]
 
-                #print("j:"+str(j))
-                #print(j//2)
 
-                result = np.asscalar(B_i.T.dot(D).dot(B_j))
+                B_i = np.array([[jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0],0.5*(jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]+jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1])],[0.5*(jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[0]+jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]),jinvt.T.dot(p1_ref.gradients(co)[:, i//2])[1]]])
+                B_j = np.array([[jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0],0.5*(jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]+jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1])],[0.5*(jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[0]+jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]),jinvt.T.dot(p1_ref.gradients(co)[:, j//2])[1]]])
+
+                B = np.squeeze(C_tensor(B_j))
+
+                ans = 0
+
+                for rt in range(2):
+                    for lt in range(2):
+                        ans += B[rt,lt]*B_i[rt,lt]
+
+                #res_wrong_x = np.sum(B)
+                #res_wrong_y = B[1,1]
+                #res_wrong_xy = B[1,0]
+
+                #res_wrong = B_i.T.dot(D).dot(B_j)
+                #result = np.asscalar(B_i.T.dot(D).dot(B_j))
 
 
-                #END
-
-
-
-                if quadpack:
-                    ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1,
-                                                 epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j, jinvt, result))
-                else:
-                    #ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
-                    #                                    args=(p1_ref, i, j, jinvt, result))
-                    ans = result/2
+                #if quadpack:
+                #    ans, err = integrate.dblquad(stiffness_matrix_integrant_fast, 0, 1, lambda x: 0, lambda x: 1,
+                #                                 epsabs=accuracy, epsrel=accuracy, args=(p1_ref, i, j, jinvt, result))
+                #else:
+                #    ans, err = gauss_legendre_reference(stiffness_matrix_integrant_fast,
+                #                                        args=(p1_ref, i, j, jinvt, result))
+                #    ans = ans/2
 
                 local_K[i,j] = np.abs(atraf.get_determinant()) * ans
+                #local_K[i,j] = np.abs(atraf.get_determinant()) * res_wrong[0]/2
+                #local_K[i+1, j+1] = np.abs(atraf.get_determinant()) * res_wrong[1] / 2
+
+                #local_K[i,j]+= np.abs(atraf.get_determinant()) *res_wrong_x/2
 
 
         if ~np.isclose(np.linalg.det(local_K),0):

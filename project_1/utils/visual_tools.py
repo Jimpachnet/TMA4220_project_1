@@ -397,6 +397,7 @@ def plot_triangulated_strain(mesh, u):
     cbar = plt.colorbar(cs)
     plt.xlabel("x")
     plt.ylabel("y")
+    plt.ylim((-1,1))
 
     plt.title(r'$u(x)$')
     plt.show()
